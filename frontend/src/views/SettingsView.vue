@@ -1,0 +1,38 @@
+<template>
+  <el-card>
+    <h3>系统设置</h3>
+    <el-form label-width="120px" style="max-width: 480px">
+      <el-form-item label="暗色主题">
+        <el-switch v-model="isDark" @change="toggleDark" />
+      </el-form-item>
+      <el-form-item label="界面语言">
+        <el-radio-group v-model="lang" @change="changeLocale">
+          <el-radio-button value="zh">简体中文</el-radio-button>
+          <el-radio-button value="en">English</el-radio-button>
+        </el-radio-group>
+      </el-form-item>
+    </el-form>
+  </el-card>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useUiStore } from '../stores/ui'
+
+const ui = useUiStore()
+const { locale } = useI18n()
+const isDark = ref(ui.isDark)
+const lang = ref(locale.value === 'en' ? 'en' : 'zh')
+
+function toggleDark(val: boolean) {
+  ui.toggleDark()
+  if (ui.isDark !== val) ui.toggleDark()
+}
+
+function changeLocale(val: string | number | boolean | undefined) {
+  const l = String(val) as 'zh' | 'en'
+  locale.value = l
+  ui.setLocale(l)
+}
+</script>

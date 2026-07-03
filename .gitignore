@@ -10,3 +10,6 @@ dist/
 .env
 *.egg-info/
 .pytest_cache/
+
+# 前端构建产物（由 npm run build 生成，供 FastAPI 托管）
+backend/app/static/
