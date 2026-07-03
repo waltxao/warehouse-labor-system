@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.core.exceptions import AppException, app_exception_handler
+from app.api.v1 import api_router
 import os
 
 app = FastAPI(title="仓库人力数据分析系统", version="1.0.0")
@@ -12,6 +13,8 @@ app.add_exception_handler(AppException, app_exception_handler)
 async def health():
     return {"code": 0, "message": "success", "data": {"status": "ok"}}
 
+
+app.include_router(api_router)
 
 # 静态资源（部署时存在 dist 则挂载）
 static_dir = os.path.join(os.path.dirname(__file__), "static")
