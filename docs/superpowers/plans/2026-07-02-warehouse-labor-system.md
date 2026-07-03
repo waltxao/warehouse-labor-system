@@ -1,4 +1,4 @@
-# 仓库人力数据分析系统 — 实施计划
+﻿# 仓库人力数据分析系统 — 实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development (recommended) or executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
