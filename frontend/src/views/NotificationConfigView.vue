@@ -84,7 +84,7 @@
           <div class="var-tags">
             <span class="var-tag" @click="insertVar('{warehouse}')">{warehouse} 仓库代码</span>
             <span class="var-tag" @click="insertVar('{date_range}')">{date_range} 日期范围</span>
-            <span class="var-tag" @click="insertVar('{notify_users}')">{notify_users} 通知人员</span>
+            <span class="var-tag" @click="insertVar('{notify_users}')">{notify_users} 被提醒人（@昵称）</span>
             <span class="var-tag" @click="insertVar('{total_attendance}')">{total_attendance} 出勤人次</span>
             <span class="var-tag" @click="insertVar('{total_required}')">{total_required} 需求人力</span>
           </div>
