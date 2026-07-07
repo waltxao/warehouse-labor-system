@@ -7,8 +7,8 @@ from app.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 WAREHOUSES = [
-    "101D", "1800", "101G", "101I", "102H", "1200",
-    "1050", "1020", "1400", "1450", "1600",
+    "101D", "1800", "101G", "102H", "1200",
+    "1050", "1400", "1450", "1600",
     "101A", "101B", "102B", "1070", "CA11", "GA11",
 ]
 

@@ -4,6 +4,7 @@ venv/
 .venv/
 *.db
 *.db-journal
+data/
 data/uploads/
 node_modules/
 dist/
@@ -11,5 +12,12 @@ dist/
 *.egg-info/
 .pytest_cache/
 
+# TRAE skill 文件（本地安装，不提交）
+.trae/
+
 # 前端构建产物（由 npm run build 生成，供 FastAPI 托管）
 backend/app/static/
+
+# 临时测试文件
+backend/test_upload.xlsx
+backend/inspect_excel.py

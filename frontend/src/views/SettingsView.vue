@@ -7,8 +7,8 @@
       </el-form-item>
       <el-form-item label="界面语言">
         <el-radio-group v-model="lang" @change="changeLocale">
-          <el-radio-button value="zh">简体中文</el-radio-button>
-          <el-radio-button value="en">English</el-radio-button>
+          <el-radio-button value="zh-CN">简体中文</el-radio-button>
+          <el-radio-button value="zh-TW">繁體中文</el-radio-button>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -23,7 +23,7 @@ import { useUiStore } from '../stores/ui'
 const ui = useUiStore()
 const { locale } = useI18n()
 const isDark = ref(ui.isDark)
-const lang = ref(locale.value === 'en' ? 'en' : 'zh')
+const lang = ref(locale.value === 'zh-TW' ? 'zh-TW' : 'zh-CN')
 
 function toggleDark(val: boolean) {
   ui.toggleDark()
@@ -31,8 +31,9 @@ function toggleDark(val: boolean) {
 }
 
 function changeLocale(val: string | number | boolean | undefined) {
-  const l = String(val) as 'zh' | 'en'
+  const l = String(val) as 'zh-CN' | 'zh-TW'
   locale.value = l
   ui.setLocale(l)
+  localStorage.setItem('app-lang', l)
 }
 </script>

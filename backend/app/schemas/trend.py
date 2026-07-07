@@ -25,3 +25,18 @@ class ChartData(BaseModel):
     required_so: list[float | None]
     three_month_avg: list[float | None]
     is_partial: list[bool]
+
+
+class SummaryData(BaseModel):
+    iso_week: str
+    days: list[str]
+    attendance_sums: list[float]
+    required_so_sums: list[float]
+    avg_sums: list[float]
+
+
+class WeekInfo(BaseModel):
+    iso_week: str
+    label: str
+    start_date: str | None
+    end_date: str | None

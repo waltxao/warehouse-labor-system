@@ -17,4 +17,5 @@ export default {
   export: '导出',
   analyze: '分析',
   create: '创建',
+  language: '语言',
 }

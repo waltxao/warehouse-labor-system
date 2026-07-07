@@ -134,17 +134,30 @@ async def _build_prompt(db: AsyncSession, analysis_type: str, warehouse_codes: l
 
 
 async def _call_ai_api(prompt: str) -> tuple[str, int, int]:
+    if not settings.AI_API_KEY:
+        raise AppException("AI API Key 未配置，请在 backend/.env 文件中设置 AI_API_KEY")
+
     async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(
-            f"{settings.AI_API_BASE_URL}v1/chat/completions",
-            headers={"Authorization": f"Bearer {settings.AI_API_KEY}"},
-            json={
-                "model": settings.AI_MODEL_ID,
-                "messages": [{"role": "user", "content": prompt}],
-            },
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        content = data["choices"][0]["message"]["content"]
-        usage = data.get("usage", {})
-        return content, usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
+        try:
+            resp = await client.post(
+                f"{settings.AI_API_BASE_URL}v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {settings.AI_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": settings.AI_MODEL_ID,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            content = data["choices"][0]["message"]["content"]
+            usage = data.get("usage", {})
+            return content, usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 401:
+                raise AppException("AI API Key 无效或已过期，请检查 backend/.env 中的 AI_API_KEY 配置")
+            raise AppException(f"AI API 请求失败: HTTP {e.response.status_code} - {e.response.text[:200]}")
+        except httpx.RequestError as e:
+            raise AppException(f"AI API 网络请求失败: {str(e)}")
