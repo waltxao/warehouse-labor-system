@@ -12,6 +12,12 @@
         </el-radio-group>
       </el-form-item>
     </el-form>
+
+    <PageIntro :items="[
+      '切换系统语言（简体中文 / 繁体中文）',
+      '语言设置自动保存，刷新页面后保持',
+      '仅管理员可访问系统设置'
+    ]" />
   </el-card>
 </template>
 
@@ -19,6 +25,7 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUiStore } from '../stores/ui'
+import PageIntro from '../components/PageIntro.vue'
 
 const ui = useUiStore()
 const { locale } = useI18n()

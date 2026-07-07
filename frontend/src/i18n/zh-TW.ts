@@ -4,6 +4,7 @@ export default {
   comparison: '多倉對比',
   upload: '數據上傳',
   alerts: '告警管理',
+  notifications: '推送配置',
   aiAnalysis: 'AI 分析',
   users: '用戶管理',
   settings: '系統設置',

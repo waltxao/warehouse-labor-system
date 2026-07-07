@@ -1,28 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&display=swap');
-
 :root {
-  --color-primary: #1E40AF;
-  --color-primary-light: #3B82F6;
-  --color-accent: #D97706;
-  --color-bg: #F8FAFC;
-  --color-fg: #1E3A8A;
-  --color-border: #DBEAFE;
-  --color-muted: #E9EEF6;
-  --color-sidebar-start: #1E3A8A;
-  --color-sidebar-end: #1E40AF;
-  --color-amber-bg: #FEF3C7;
-  --color-amber-border: #D97706;
-  --color-text-secondary: #64748B;
+  --color-primary: #007AFF;
+  --color-primary-light: #5AC8FA;
+  --color-accent: #FF9500;
+  --color-bg: #F2F2F7;
+  --color-fg: #1C1C1E;
+  --color-border: #E5E5EA;
+  --color-muted: #E5E5EA;
+  --color-sidebar: #1C1C1E;
+  --color-sidebar-end: #2C2C2E;
+  --color-amber-bg: #FFF8E7;
+  --color-amber-border: #FF9500;
+  --color-text-secondary: #8E8E93;
   --color-white: #ffffff;
-  --font-sans: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --font-mono: 'Fira Code', 'Courier New', monospace;
-  --radius-sm: 8px;
-  --radius: 12px;
-  --shadow-sm: 0 1px 3px rgba(30, 58, 138, 0.08);
-  --shadow-md: 0 4px 12px rgba(30, 58, 138, 0.10);
-  --shadow-lg: 0 8px 24px rgba(30, 58, 138, 0.16);
-  --transition-fast: 150ms ease;
-  --transition: 200ms ease;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, monospace;
+  --radius-sm: 12px;
+  --radius: 16px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+  --transition-fast: 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-spring: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -52,7 +52,7 @@ body,
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #BFD3F2;
+  background: #C7C7CC;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {

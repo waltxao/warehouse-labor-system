@@ -67,6 +67,13 @@
         <el-button type="primary" :loading="creating" @click="handleCreate">创建</el-button>
       </template>
     </el-dialog>
+
+    <PageIntro :items="[
+      '告警日志页签：按周次筛选查看历史告警记录',
+      '告警规则页签：配置告警阈值和触发条件',
+      '告警类型包括出勤不足、需求超额、满足率异常等',
+      '仅管理员可创建和管理告警规则'
+    ]" />
   </div>
 </template>
 
@@ -77,6 +84,7 @@ import { getRules, createRule, getLogs } from '../api/alerts'
 import { useAuthStore } from '../stores/auth'
 import { ElMessage } from 'element-plus'
 import client from '../api/client'
+import PageIntro from '../components/PageIntro.vue'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -144,7 +152,7 @@ async function handleCreate() {
 <style scoped>
 .page-container {
   padding: 20px;
-  background: #F8FAFC;
+  background: #F2F2F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -155,9 +163,9 @@ async function handleCreate() {
   margin-bottom: 16px;
   background: #fff;
   padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
 }
 
 .filter-group {
@@ -172,78 +180,78 @@ async function handleCreate() {
 
 .content-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
   min-height: 400px;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .content-card:hover {
-  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.16);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 :deep(.el-button--primary) {
-  background-color: #1E40AF;
-  border-color: #1E40AF;
+  background-color: #007AFF;
+  border-color: #007AFF;
   font-weight: 500;
-  transition: all 200ms ease;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-button--primary:hover) {
-  background-color: #1E3A8A;
-  border-color: #1E3A8A;
+  background-color: #0051D5;
+  border-color: #0051D5;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+  box-shadow: 0 4px 12px rgba(0,122,255,0.20);
 }
 
 :deep(.el-select__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #DBEAFE inset;
-  transition: box-shadow 200ms ease;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px #E5E5EA inset;
+  transition: box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px #3B82F6 inset;
+  box-shadow: 0 0 0 1px #5AC8FA inset;
 }
 :deep(.el-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px #1E40AF inset;
+  box-shadow: 0 0 0 1px #007AFF inset;
 }
 
 /* 标签页样式 */
 :deep(.el-tabs__item) {
-  color: #64748B;
+  color: #8E8E93;
   font-size: 15px;
   font-weight: 500;
-  transition: color 200ms ease;
+  transition: color 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-tabs__item.is-active) {
-  color: #1E40AF;
+  color: #007AFF;
 }
 :deep(.el-tabs__active-bar) {
-  background-color: #1E40AF;
+  background-color: #007AFF;
 }
 :deep(.el-tabs__item:hover) {
-  color: #3B82F6;
+  color: #5AC8FA;
 }
 
 /* 表格样式 */
 :deep(.alert-table) {
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid #DBEAFE;
+  border: 1px solid #E5E5EA;
 }
 :deep(.alert-table th.el-table__cell) {
-  background: #EFF6FF;
-  color: #1E40AF;
+  background: #F2F2F7;
+  color: #007AFF;
   font-weight: 600;
   font-size: 14px;
 }
 :deep(.alert-table .el-table__cell) {
-  border-color: #DBEAFE;
-  color: #1E3A8A;
+  border-color: #E5E5EA;
+  color: #1C1C1E;
 }
 :deep(.alert-table tr:hover > td.el-table__cell) {
-  background: #F8FAFC !important;
+  background: #F2F2F7 !important;
 }
 :deep(.alert-table .el-table__row:hover) {
   transform: translateY(-1px);

@@ -28,6 +28,12 @@ const routes: RouteRecordRaw[] = [
         meta: { roles: ['admin'] },
       },
       { path: 'alerts', name: 'alerts', component: () => import('../views/AlertsView.vue') },
+      {
+        path: 'notifications',
+        name: 'notifications',
+        component: () => import('../views/NotificationConfigView.vue'),
+        meta: { roles: ['admin'] },
+      },
       { path: 'ai-analysis', name: 'ai-analysis', component: () => import('../views/AIAnalysisView.vue') },
       {
         path: 'users',

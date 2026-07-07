@@ -30,6 +30,13 @@
         <el-button type="primary" :loading="creating" @click="handleCreate">{{ t('create') }}</el-button>
       </template>
     </el-dialog>
+
+    <PageIntro :items="[
+      '管理员可创建新用户并分配角色（管理员、仓库查看员、全局查看员）',
+      '仓库查看员仅能查看分配给自己的仓库数据',
+      '全局查看员可查看所有仓库数据但不能上传或管理',
+      '点击编辑可修改用户信息和仓库绑定'
+    ]" />
   </el-card>
 </template>
 
@@ -37,6 +44,7 @@
 import { ref, onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getUsers, createUser } from '../api/users'
+import PageIntro from '../components/PageIntro.vue'
 import { ElMessage } from 'element-plus'
 
 const { t } = useI18n()

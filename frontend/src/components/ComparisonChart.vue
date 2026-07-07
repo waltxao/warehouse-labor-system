@@ -15,7 +15,7 @@ const props = defineProps<{
 const chartRef = ref<HTMLElement>()
 let chart: echarts.ECharts | null = null
 
-const palette = ['#1E40AF', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE']
+const palette = ['#007AFF', '#5AC8FA', '#34C759', '#FF9500', '#AF52DE', '#FF3B30']
 
 const WEEKDAY_NAMES = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
@@ -55,18 +55,18 @@ function renderChart() {
     tooltip: {
       trigger: 'axis',
       backgroundColor: 'rgba(255,255,255,0.98)',
-      borderColor: '#DBEAFE',
+      borderColor: '#E5E5EA',
       borderWidth: 1,
       borderRadius: 8,
       padding: [8, 12],
       textStyle: {
-        color: '#1E3A8A',
-        fontFamily: 'Fira Sans, sans-serif',
+        color: '#1C1C1E',
+        fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Display, sans-serif',
         fontSize: 13,
       },
-      extraCssText: 'box-shadow: 0 4px 16px rgba(30,58,138,0.16);',
+      extraCssText: 'box-shadow: 0 4px 16px rgba(0,0,0,0.08);',
       formatter: (params: any) => {
-        let html = `<div style="font-weight:bold;margin-bottom:4px;color:#1E3A8A;">${params[0].axisValue}</div>`
+        let html = `<div style="font-weight:bold;margin-bottom:4px;color:#1C1C1E;">${params[0].axisValue}</div>`
         params.forEach((p: any) => {
           html += `<div style="color:${p.color};">● ${p.seriesName}: ${fmtNum(p.value)}</div>`
         })
@@ -76,8 +76,8 @@ function renderChart() {
     legend: {
       data: props.series.map((s) => s.name),
       textStyle: {
-        color: '#1E3A8A',
-        fontFamily: 'Fira Sans, sans-serif',
+        color: '#1C1C1E',
+        fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Display, sans-serif',
         fontSize: 13,
       },
       itemGap: 20,
@@ -88,25 +88,25 @@ function renderChart() {
       type: 'category',
       data: xLabels,
       axisLabel: {
-        color: '#1E3A8A',
-        fontFamily: 'Fira Code, monospace',
+        color: '#1C1C1E',
+        fontFamily: 'SF Mono, ui-monospace, monospace',
         fontSize: 12,
         interval: 0,
         rotate: 0,
         margin: 15,
       },
-      axisLine: { lineStyle: { color: '#DBEAFE' } },
+      axisLine: { lineStyle: { color: '#E5E5EA' } },
       axisTick: { alignWithLabel: true },
     },
     yAxis: {
       type: 'value',
       axisLabel: {
-        color: '#64748B',
-        fontFamily: 'Fira Sans, sans-serif',
+        color: '#8E8E93',
+        fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Display, sans-serif',
         fontSize: 13,
         formatter: (val: number) => fmtNum(val),
       },
-      splitLine: { lineStyle: { type: 'dashed', color: '#E9EEF6' } },
+      splitLine: { lineStyle: { type: 'dashed', color: '#E5E5EA' } },
       axisLine: { show: false },
     },
     dataZoom: [{ type: 'inside' }, { type: 'slider' }],
@@ -126,10 +126,10 @@ function renderChart() {
       label: {
         show: true,
         position: props.chartType === 'bar' ? 'top' : 'top',
-        fontFamily: 'Fira Code, monospace',
+        fontFamily: 'SF Mono, ui-monospace, monospace',
         fontSize: 11,
         fontWeight: 'bold',
-        color: '#1E3A8A',
+        color: '#1C1C1E',
         formatter: (p: any) => fmtNum(p.value),
       },
     })),

@@ -4,15 +4,15 @@
       <h3 class="chart-title">{{ title }}</h3>
       <div class="chart-legend">
         <span class="legend-item">
-          <span class="legend-dot" style="background: #1E40AF;"></span>
+          <span class="legend-dot" style="background: #007AFF;"></span>
           實際出勤人數
         </span>
         <span class="legend-item">
-          <span class="legend-dot" style="background: #3B82F6;"></span>
+          <span class="legend-dot" style="background: #5AC8FA;"></span>
           實際需求人力
         </span>
         <span class="legend-item">
-          <span class="legend-line" style="border-top: 2px dashed #D97706;"></span>
+          <span class="legend-line" style="border-top: 2px dashed #FF9500;"></span>
           近3月需求人力平均值
         </span>
       </div>
@@ -53,17 +53,17 @@ function renderChart() {
       trigger: "axis",
       appendToBody: true,
       backgroundColor: "rgba(255,255,255,0.98)",
-      borderColor: "#DBEAFE",
+      borderColor: "#E5E5EA",
       borderWidth: 1,
       padding: [8, 12],
       textStyle: {
-        color: "#1E3A8A",
-        fontFamily: "Fira Sans, sans-serif",
+        color: "#1C1C1E",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
         fontSize: 13,
       },
-      extraCssText: "border-radius: 8px; box-shadow: 0 4px 12px rgba(30,58,138,0.15);",
+      extraCssText: "border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);",
       formatter: (params: any) => {
-        let html = `<div style="font-weight:bold;margin-bottom:4px;color:#1E3A8A;">${params[0].axisValue}</div>`;
+        let html = `<div style="font-weight:bold;margin-bottom:4px;color:#1C1C1E;">${params[0].axisValue}</div>`;
         params.forEach((p: any) => {
           const raw = p.value ? Number(p.value) : 0; const rounded = Math.round(raw * 100) / 100; const val = rounded % 1 === 0 ? String(rounded) : String(parseFloat(rounded.toFixed(2)));
           html += `<div style="color:${p.color};">● ${p.seriesName}: ${val}</div>`;
@@ -84,26 +84,26 @@ function renderChart() {
       type: "category",
       data: props.days,
       axisLabel: {
-        fontFamily: "Fira Code, monospace",
+        fontFamily: "SF Mono, ui-monospace, monospace",
         fontSize: 12,
-        color: "#1E3A8A",
+        color: "#1C1C1E",
         rotate: 0,
         interval: 0,
         fontWeight: "bold",
         margin: 15,
         formatter: (val: string) => val.replace(" ", "\n"),
       },
-      axisLine: { lineStyle: { color: "#DBEAFE" } },
+      axisLine: { lineStyle: { color: "#E5E5EA" } },
       axisTick: { alignWithLabel: true },
     },
     yAxis: {
       type: "value",
       axisLabel: {
-        fontFamily: "Fira Sans, sans-serif",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
         fontSize: 13,
-        color: "#64748B",
+        color: "#8E8E93",
       },
-      splitLine: { lineStyle: { type: "dashed", color: "#E9EEF6" } },
+      splitLine: { lineStyle: { type: "dashed", color: "#E5E5EA" } },
       axisLine: { show: false },
     },
     series: [
@@ -114,21 +114,21 @@ function renderChart() {
         smooth: true,
         symbol: "circle",
         symbolSize: 8,
-        itemStyle: { color: "#1E40AF" },
-        lineStyle: { width: 3, color: "#1E40AF" },
+        itemStyle: { color: "#007AFF" },
+        lineStyle: { width: 3, color: "#007AFF" },
         label: {
           show: true,
           position: "top",
-          fontFamily: "Fira Code, monospace",
+          fontFamily: "SF Mono, ui-monospace, monospace",
           fontSize: 12,
-          color: "#1E40AF",
+          color: "#007AFF",
           fontWeight: "bold",
           formatter: (p: any) => { if (!p.value) return ""; const r = Math.round(p.value * 100) / 100; return r % 1 === 0 ? String(r) : String(parseFloat(r.toFixed(2))); },
         },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: "rgba(30, 64, 175, 0.15)" },
-            { offset: 1, color: "rgba(30, 64, 175, 0)" },
+            { offset: 0, color: "rgba(0,122,255,0.12)" },
+            { offset: 1, color: "rgba(0,122,255,0)" },
           ]),
         },
       },
@@ -139,14 +139,14 @@ function renderChart() {
         smooth: true,
         symbol: "circle",
         symbolSize: 8,
-        itemStyle: { color: "#3B82F6" },
-        lineStyle: { width: 3, color: "#3B82F6" },
+        itemStyle: { color: "#5AC8FA" },
+        lineStyle: { width: 3, color: "#5AC8FA" },
         label: {
           show: true,
           position: "top",
-          fontFamily: "Fira Code, monospace",
+          fontFamily: "SF Mono, ui-monospace, monospace",
           fontSize: 12,
-          color: "#3B82F6",
+          color: "#5AC8FA",
           fontWeight: "bold",
           formatter: (p: any) => { if (!p.value) return ""; const r = Math.round(p.value * 100) / 100; return r % 1 === 0 ? String(r) : String(parseFloat(r.toFixed(2))); },
         },
@@ -158,14 +158,14 @@ function renderChart() {
         smooth: true,
         symbol: "diamond",
         symbolSize: 10,
-        itemStyle: { color: "#D97706" },
-        lineStyle: { width: 2, color: "#D97706", type: "dashed" },
+        itemStyle: { color: "#FF9500" },
+        lineStyle: { width: 2, color: "#FF9500", type: "dashed" },
         label: {
           show: true,
           position: "bottom",
-          fontFamily: "Fira Code, monospace",
+          fontFamily: "SF Mono, ui-monospace, monospace",
           fontSize: 12,
-          color: "#D97706",
+          color: "#FF9500",
           fontWeight: "bold",
           formatter: (p: any) => { if (!p.value) return ""; const r = Math.round(p.value * 100) / 100; return r % 1 === 0 ? String(r) : String(parseFloat(r.toFixed(2))); },
         },
@@ -205,14 +205,14 @@ defineExpose({
 <style scoped>
 .chart-wrapper {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
-  transition: box-shadow 200ms ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
+  transition: box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .chart-wrapper:hover {
-  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.16);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 .chart-header {
   margin-bottom: 10px;
@@ -221,7 +221,7 @@ defineExpose({
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 8px 0;
-  color: #1E3A8A;
+  color: #1C1C1E;
 }
 .chart-legend {
   display: flex;
@@ -231,7 +231,7 @@ defineExpose({
 }
 .legend-item {
   font-size: 13px;
-  color: #64748B;
+  color: #8E8E93;
   display: flex;
   align-items: center;
   gap: 6px;

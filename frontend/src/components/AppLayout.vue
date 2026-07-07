@@ -59,6 +59,19 @@
         </div>
 
         <div
+          v-if="auth.hasRole('admin')"
+          class="nav-item"
+          :class="{ active: activeMenu === '/notifications' }"
+          @click="navigate('/notifications')"
+        >
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/>
+            <path d="m21.854 2.147-10.94 10.939"/>
+          </svg>
+          <span>{{ t('notifications') || '推送配置' }}</span>
+        </div>
+
+        <div
           class="nav-item"
           :class="{ active: activeMenu === '/ai-analysis' }"
           @click="navigate('/ai-analysis')"
@@ -123,6 +136,9 @@
       </el-header>
       <el-main>
         <router-view />
+        <div class="app-footer">
+          仓库人力数据分析系统 v2.2.0 · 作者：Walt · © 2026
+        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -170,7 +186,7 @@ function handleLogout() {
 
 <style scoped>
 .app-aside {
-  background: linear-gradient(180deg, #1E3A8A 0%, #1E40AF 100%);
+  background: #1C1C1E;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -197,10 +213,10 @@ function handleLogout() {
   padding: 10px 12px;
   color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
-  transition: all 150ms ease;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
   border-left: 3px solid transparent;
   user-select: none;
 }
@@ -209,9 +225,9 @@ function handleLogout() {
   color: #fff;
 }
 .nav-item.active {
-  background: #DBEAFE;
-  color: #1E40AF;
-  border-left: 3px solid #D97706;
+  background: rgba(255,255,255,0.12);
+  color: #FFFFFF;
+  border-left: 3px solid #007AFF;
   font-weight: 600;
 }
 .nav-icon {
@@ -224,7 +240,7 @@ function handleLogout() {
   justify-content: space-between;
   align-items: center;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   border-bottom: none;
   z-index: 10;
 }
@@ -236,7 +252,13 @@ function handleLogout() {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #1E3A8A;
+  color: #1C1C1E;
   font-weight: 500;
+}
+.app-footer {
+  text-align: center;
+  padding: 16px 0 8px;
+  font-size: 12px;
+  color: #8E8E93;
 }
 </style>

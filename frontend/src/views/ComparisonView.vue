@@ -60,6 +60,13 @@
       />
       <el-empty v-else description="请选择仓库与周次后进行多仓对比" />
     </div>
+
+    <PageIntro :items="[
+      '选择最多6个仓库进行对比分析，可切换出勤人数、需求SO、节省人数等指标',
+      '支持柱状图和折线图两种展示方式，柱状图适合对比绝对值，折线图适合看趋势',
+      '图表上方数据标签显示具体数值，整数显示整数，小数最多两位',
+      'X轴显示日期和星期，便于定位具体某天的数据'
+    ]" />
   </div>
 </template>
 
@@ -69,6 +76,7 @@ import { useI18n } from 'vue-i18n'
 import ComparisonChart from '../components/ComparisonChart.vue'
 import { compare } from '../api/comparison'
 import client from '../api/client'
+import PageIntro from '../components/PageIntro.vue'
 
 const { t } = useI18n()
 const selectedWarehouses = ref<string[]>([])
@@ -133,7 +141,7 @@ async function loadData() {
 <style scoped>
 .page-container {
   padding: 20px;
-  background: #F8FAFC;
+  background: #F2F2F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -144,9 +152,9 @@ async function loadData() {
   margin-bottom: 16px;
   background: #fff;
   padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
 }
 
 .filter-group {
@@ -163,53 +171,53 @@ async function loadData() {
 
 .content-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
   min-height: 400px;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .content-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.16);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 :deep(.el-button--primary) {
-  background-color: #1E40AF;
-  border-color: #1E40AF;
+  background-color: #007AFF;
+  border-color: #007AFF;
   font-weight: 500;
-  transition: all 200ms ease;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-button--primary:hover) {
-  background-color: #1E3A8A;
-  border-color: #1E3A8A;
+  background-color: #0051D5;
+  border-color: #0051D5;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+  box-shadow: 0 4px 12px rgba(0,122,255,0.20);
 }
 
 :deep(.el-radio-button__inner) {
-  border-color: #DBEAFE;
-  color: #1E40AF;
-  transition: all 200ms ease;
+  border-color: #E5E5EA;
+  color: #007AFF;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  background-color: #1E40AF;
-  border-color: #1E40AF;
+  background-color: #007AFF;
+  border-color: #007AFF;
   color: #fff;
-  box-shadow: -1px 0 0 0 #1E40AF;
+  box-shadow: -1px 0 0 0 #007AFF;
 }
 
 :deep(.el-select__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #DBEAFE inset;
-  transition: box-shadow 200ms ease;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px #E5E5EA inset;
+  transition: box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px #3B82F6 inset;
+  box-shadow: 0 0 0 1px #5AC8FA inset;
 }
 :deep(.el-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px #1E40AF inset;
+  box-shadow: 0 0 0 1px #007AFF inset;
 }
 </style>

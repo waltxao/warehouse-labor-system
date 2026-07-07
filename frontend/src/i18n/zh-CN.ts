@@ -4,6 +4,7 @@ export default {
   comparison: '多仓对比',
   upload: '数据上传',
   alerts: '告警管理',
+  notifications: '推送配置',
   aiAnalysis: 'AI 分析',
   users: '用户管理',
   settings: '系统设置',

@@ -46,6 +46,13 @@
       <div v-if="report" class="ai-report" v-html="renderedReport"></div>
       <el-empty v-else description="选择参数后点击分析生成 AI 报告" />
     </div>
+
+    <PageIntro :items="[
+      '选择分析类型（周对比、多仓对比、月趋势、异常检测）',
+      '选择目标仓库和周次后点击分析按钮',
+      'AI 生成 Markdown 格式的分析报告，支持标题、表格、列表渲染',
+      '报告自动保存到日志，可后续查看'
+    ]" />
   </div>
 </template>
 
@@ -55,6 +62,7 @@ import { useI18n } from 'vue-i18n'
 import { analyze } from '../api/ai'
 import MarkdownIt from 'markdown-it'
 import client from '../api/client'
+import PageIntro from '../components/PageIntro.vue'
 
 const { t } = useI18n()
 const md = new MarkdownIt()
@@ -114,7 +122,7 @@ async function runAnalysis() {
 <style scoped>
 .page-container {
   padding: 20px;
-  background: #F8FAFC;
+  background: #F2F2F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -125,9 +133,9 @@ async function runAnalysis() {
   margin-bottom: 16px;
   background: #fff;
   padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
 }
 
 .filter-group {
@@ -144,56 +152,56 @@ async function runAnalysis() {
 
 .content-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
   min-height: 400px;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .content-card:hover {
-  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.16);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 :deep(.el-button--primary) {
-  background-color: #1E40AF;
-  border-color: #1E40AF;
+  background-color: #007AFF;
+  border-color: #007AFF;
   font-weight: 500;
-  transition: all 200ms ease;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-button--primary:hover) {
-  background-color: #1E3A8A;
-  border-color: #1E3A8A;
+  background-color: #0051D5;
+  border-color: #0051D5;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+  box-shadow: 0 4px 12px rgba(0,122,255,0.20);
 }
 
 :deep(.el-select__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #DBEAFE inset;
-  transition: box-shadow 200ms ease;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px #E5E5EA inset;
+  transition: box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px #3B82F6 inset;
+  box-shadow: 0 0 0 1px #5AC8FA inset;
 }
 :deep(.el-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px #1E40AF inset;
+  box-shadow: 0 0 0 1px #007AFF inset;
 }
 
 /* AI 报告区域 */
 .ai-report {
   line-height: 1.8;
-  color: #1E3A8A;
+  color: #1C1C1E;
   font-size: 14px;
-  font-family: 'Fira Sans', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 }
 
 .ai-report :deep(h1),
 .ai-report :deep(h2),
 .ai-report :deep(h3),
 .ai-report :deep(h4) {
-  color: #1E40AF;
+  color: #007AFF;
   font-weight: 600;
   margin: 18px 0 10px;
   line-height: 1.4;
@@ -218,7 +226,7 @@ async function runAnalysis() {
 }
 
 .ai-report :deep(strong) {
-  color: #1E40AF;
+  color: #007AFF;
   font-weight: 600;
 }
 
@@ -226,39 +234,39 @@ async function runAnalysis() {
   width: 100%;
   border-collapse: collapse;
   margin: 14px 0;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .ai-report :deep(th),
 .ai-report :deep(td) {
-  border: 1px solid #DBEAFE;
+  border: 1px solid #E5E5EA;
   padding: 10px 14px;
   text-align: left;
   font-size: 13px;
 }
 
 .ai-report :deep(th) {
-  background: #EFF6FF;
-  color: #1E40AF;
+  background: #F2F2F7;
+  color: #007AFF;
   font-weight: 600;
 }
 
 .ai-report :deep(code) {
-  background: #EFF6FF;
-  color: #1E40AF;
+  background: #F2F2F7;
+  color: #007AFF;
   padding: 2px 6px;
   border-radius: 4px;
-  font-family: 'Fira Code', monospace;
+  font-family: 'SF Mono', ui-monospace, monospace;
   font-size: 13px;
 }
 
 .ai-report :deep(blockquote) {
-  border-left: 4px solid #3B82F6;
-  background: #F8FAFC;
+  border-left: 4px solid #5AC8FA;
+  background: #F2F2F7;
   padding: 10px 16px;
   margin: 12px 0;
-  color: #64748B;
+  color: #8E8E93;
   border-radius: 0 8px 8px 0;
 }
 </style>

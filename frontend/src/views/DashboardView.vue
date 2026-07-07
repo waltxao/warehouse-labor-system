@@ -36,6 +36,14 @@
       <div class="action-group">
         <el-button type="primary" @click="fetchData">查询</el-button>
         <el-button class="export-btn" @click="exportPng">导出 PNG</el-button>
+        <el-button
+          v-if="selectedWarehouse"
+          class="push-btn"
+          :loading="pushing"
+          @click="pushToWechat"
+        >
+          推送到企业微信
+        </el-button>
       </div>
     </div>
 
@@ -81,6 +89,14 @@
         <div class="stat-value">{{ warehouseCount }}</div>
       </div>
     </div>
+
+    <PageIntro :items="[
+      '选择周次和仓库后点击查询，图表展示该周每日出勤人数与需求人力趋势',
+      '蓝色实线为实际出勤人数，浅蓝实线为实际需求人力，橙色虚线为近3月均值基线',
+      '上方KPI卡片显示周总出勤人次、需求人力、均值基线汇总数据',
+      '点击导出 PNG 可保存当前图表为图片',
+      '选择单个仓库后，可点击推送到企业微信按钮将图表发送到对应仓库群'
+    ]" />
   </div>
 </template>
 
@@ -95,6 +111,9 @@ function fmtNum(v: number): string {
 }
 import TrendChart from "../components/TrendChart.vue";
 import client from "../api/client";
+import PageIntro from "../components/PageIntro.vue";
+import { pushChart } from "../api/webhook";
+import { ElMessage } from "element-plus";
 
 interface WeekInfo {
   iso_week: string;
@@ -203,6 +222,35 @@ function exportPng() {
   }
 }
 
+const pushing = ref(false);
+
+async function pushToWechat() {
+  if (!selectedWarehouse.value || !selectedWeek.value) return;
+  pushing.value = true;
+  try {
+    const dataUrl = chartRef.value?.getDataURL();
+    if (!dataUrl) {
+      ElMessage.error("图表导出失败");
+      return;
+    }
+    const base64 = dataUrl.split("base64,")[1] || dataUrl;
+    const resp: any = await pushChart({
+      warehouse_code: selectedWarehouse.value,
+      iso_week: selectedWeek.value,
+      chart_base64: base64,
+    });
+    if (resp?.code === 0) {
+      ElMessage.success("推送成功");
+    } else {
+      ElMessage.error(resp?.message || "推送失败");
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || "推送失败");
+  } finally {
+    pushing.value = false;
+  }
+}
+
 onMounted(async () => {
   await Promise.all([fetchWeeks(), fetchWarehouses()]);
   await fetchData();
@@ -212,7 +260,7 @@ onMounted(async () => {
 <style scoped>
 .dashboard {
   padding: 20px;
-  background: #F8FAFC;
+  background: #F2F2F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -223,9 +271,9 @@ onMounted(async () => {
   margin-bottom: 16px;
   background: #fff;
   padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
 }
 
 .filter-group {
@@ -240,62 +288,62 @@ onMounted(async () => {
 
 /* 查询按钮主色 */
 :deep(.el-button--primary) {
-  background-color: #1E40AF;
-  border-color: #1E40AF;
+  background-color: #007AFF;
+  border-color: #007AFF;
   font-weight: 500;
-  transition: all 200ms ease;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-button--primary:hover) {
-  background-color: #1E3A8A;
-  border-color: #1E3A8A;
+  background-color: #0051D5;
+  border-color: #0051D5;
 }
 
 /* 导出按钮边框样式 */
 :deep(.export-btn) {
   background: #fff;
-  border: 1px solid #DBEAFE;
-  color: #1E40AF;
+  border: 1px solid #E5E5EA;
+  color: #007AFF;
   font-weight: 500;
-  transition: all 200ms ease;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.export-btn:hover) {
-  border-color: #1E40AF;
-  color: #1E40AF;
-  background: #F8FAFC;
+  border-color: #007AFF;
+  color: #007AFF;
+  background: #F2F2F7;
 }
 
 /* 筛选器样式覆盖 */
 :deep(.el-select__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #DBEAFE inset;
-  transition: box-shadow 200ms ease;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px #E5E5EA inset;
+  transition: box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px #3B82F6 inset;
+  box-shadow: 0 0 0 1px #5AC8FA inset;
 }
 :deep(.el-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px #1E40AF inset;
+  box-shadow: 0 0 0 1px #007AFF inset;
 }
 
 .chart-description {
-  background: #FEF3C7;
-  border-radius: 12px;
+  background: #FFF8E7;
+  border-radius: 16px;
   padding: 16px 20px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.10);
-  border-left: 4px solid #D97706;
+  box-shadow: 0 1px 3px rgba(255,149,0,0.10);
+  border-left: 4px solid #FF9500;
 }
 
 .desc-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1E3A8A;
+  color: #1C1C1E;
   margin-bottom: 8px;
 }
 
 .desc-content {
   font-size: 13px;
-  color: #78350F;
+  color: #8E8E93;
   line-height: 1.8;
 }
 
@@ -305,11 +353,11 @@ onMounted(async () => {
 
 .desc-label {
   font-weight: 600;
-  color: #92400E;
+  color: #1C1C1E;
 }
 
 .desc-ps {
-  color: #B45309;
+  color: #8E8E93;
   font-style: italic;
   margin-top: 4px !important;
 }
@@ -322,22 +370,22 @@ onMounted(async () => {
 
 .stat-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.08);
-  border: 1px solid #DBEAFE;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #E5E5EA;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.16);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 .stat-label {
   font-size: 14px;
-  color: #64748B;
+  color: #8E8E93;
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -345,8 +393,20 @@ onMounted(async () => {
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #1E3A8A;
-  font-family: 'Fira Code', 'Courier New', monospace;
+  color: #1C1C1E;
+  font-family: 'SF Mono', ui-monospace, monospace;
   letter-spacing: -0.02em;
+}
+
+:deep(.push-btn) {
+  background: #FF9500;
+  border: 1px solid #FF9500;
+  color: #fff;
+  font-weight: 500;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+:deep(.push-btn:hover) {
+  background: #E68600;
+  border-color: #E68600;
 }
 </style>

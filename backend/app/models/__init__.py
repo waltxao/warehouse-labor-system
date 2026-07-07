@@ -4,9 +4,11 @@ from app.models.report import WeeklyReport, DailyRecord
 from app.models.average import ThreeMonthAverage
 from app.models.alert import AlertRule, AlertLog
 from app.models.log import UploadLog, AIAnalysisLog, AuditLog
+from app.models.webhook import WebhookConfig
 
 __all__ = [
     "User", "UserWarehouseBinding", "Warehouse",
     "WeeklyReport", "DailyRecord", "ThreeMonthAverage",
     "AlertRule", "AlertLog", "UploadLog", "AIAnalysisLog", "AuditLog",
+    "WebhookConfig",
 ]

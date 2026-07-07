@@ -1,11 +1,23 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from app.core.exceptions import AppException, app_exception_handler
+from app.database import engine, Base
+import app.models  # noqa: F401  确保所有模型被导入以注册到 Base.metadata
 from app.api.v1 import api_router
 import os
 
-app = FastAPI(title="仓库人力数据分析系统", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动时自动创建缺失的表（SQLite，create_all 是幂等的）
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+
+
+app = FastAPI(title="仓库人力数据分析系统", version="1.0.0", lifespan=lifespan)
 
 app.add_exception_handler(AppException, app_exception_handler)
 
