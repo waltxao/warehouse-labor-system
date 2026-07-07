@@ -19,10 +19,10 @@
             <span class="url-cell" :title="row.webhook_url">{{ row.webhook_url }}</span>
           
     <PageIntro :items="[
-      '为每个仓库配置企业微信 Webhook 地址和通知人员手机号',
-      '通知人员手机号使用英文逗号分隔，如：13800138000,13900139000',
-      '配置完成后，在总览页选择单个仓库即可看到推送按钮',
-      '推送消息包含图表截图和数据摘要文字，并@通知人员',
+      '为每个仓库配置企业微信 Webhook 地址和通知人员昵称',
+      '通知人员昵称使用英文逗号分隔，如：张三,李四',
+      '配置完成后，在总览页可点击推送按钮将图表发送到企业微信群',
+      '推送消息包含图表截图和 markdown 富文本，并@通知人员昵称',
       '仅管理员可访问此页面'
     ]" />
 </template>
@@ -72,10 +72,10 @@
             placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"
           />
         </el-form-item>
-        <el-form-item label="通知人员手机号">
+        <el-form-item label="通知人员昵称">
           <el-input
             v-model="form.notify_users"
-            placeholder="多个手机号用英文逗号分隔，如：13800138000,13900139000"
+            placeholder="企业微信昵称，逗号分隔，如：张三,李四"
           />
         </el-form-item>
         <el-form-item label="启用状态">
@@ -233,7 +233,7 @@ onMounted(async () => {
 <style scoped>
 .page-container {
   padding: 20px;
-  background: #F2F2F7;
+  background: #F5F5F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -245,7 +245,7 @@ onMounted(async () => {
   background: #fff;
   padding: 20px 24px;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .title-group {
@@ -257,13 +257,13 @@ onMounted(async () => {
 .page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1D1D1F;
   margin: 0;
 }
 
 .page-subtitle {
   font-size: 13px;
-  color: #8E8E93;
+  color: #6E6E73;
   margin: 0;
 }
 
@@ -271,22 +271,22 @@ onMounted(async () => {
   background: #fff;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   min-height: 400px;
 }
 
 /* 主色按钮 */
 :deep(.primary-btn) {
-  background: #007AFF;
-  border: 1px solid #007AFF;
+  background: #2563EB;
+  border: 1px solid #2563EB;
   color: #fff;
   font-weight: 500;
   border-radius: 10px;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.primary-btn:hover) {
-  background: #0066D6;
-  border-color: #0066D6;
+  background: #1D4ED8;
+  border-color: #1D4ED8;
   transform: translateY(-1px);
 }
 
@@ -296,17 +296,17 @@ onMounted(async () => {
   overflow: hidden;
 }
 :deep(.webhook-table th.el-table__cell) {
-  background: #F2F2F7;
-  color: #1C1C1E;
+  background: #F5F5F7;
+  color: #1D1D1F;
   font-weight: 600;
   font-size: 14px;
 }
 :deep(.webhook-table .el-table__cell) {
-  border-color: #E5E5EA;
-  color: #1C1C1E;
+  border-color: #D2D2D7;
+  color: #1D1D1F;
 }
 :deep(.webhook-table tr:hover > td.el-table__cell) {
-  background: #F2F2F7 !important;
+  background: #F5F5F7 !important;
 }
 
 .url-cell {
@@ -315,9 +315,9 @@ onMounted(async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #8E8E93;
+  color: #6E6E73;
   font-size: 13px;
-  font-family: 'SF Mono', ui-monospace, monospace;
+  font-family: 'Cascadia Code', ui-monospace, monospace;
 }
 
 .status-tag {
@@ -332,12 +332,12 @@ onMounted(async () => {
   color: #30D158;
 }
 .status-tag.inactive {
-  background: rgba(142, 142, 147, 0.12);
-  color: #8E8E93;
+  background: rgba(110,110,115, 0.12);
+  color: #6E6E73;
 }
 
 :deep(.edit-link) {
-  color: #007AFF;
+  color: #2563EB;
   font-weight: 500;
 }
 :deep(.del-link) {

@@ -141,7 +141,7 @@ async function loadData() {
 <style scoped>
 .page-container {
   padding: 20px;
-  background: #F2F2F7;
+  background: #F5F5F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -153,8 +153,8 @@ async function loadData() {
   background: #fff;
   padding: 16px 20px;
   border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #D2D2D7;
 }
 
 .filter-group {
@@ -173,51 +173,51 @@ async function loadData() {
   background: #fff;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #D2D2D7;
   min-height: 400px;
   transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .content-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
 :deep(.el-button--primary) {
-  background-color: #007AFF;
-  border-color: #007AFF;
+  background-color: #2563EB;
+  border-color: #2563EB;
   font-weight: 500;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-button--primary:hover) {
-  background-color: #0051D5;
-  border-color: #0051D5;
+  background-color: #1D4ED8;
+  border-color: #1D4ED8;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,122,255,0.20);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.20);
 }
 
 :deep(.el-radio-button__inner) {
-  border-color: #E5E5EA;
-  color: #007AFF;
+  border-color: #D2D2D7;
+  color: #2563EB;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  background-color: #007AFF;
-  border-color: #007AFF;
+  background-color: #2563EB;
+  border-color: #2563EB;
   color: #fff;
-  box-shadow: -1px 0 0 0 #007AFF;
+  box-shadow: -1px 0 0 0 #2563EB;
 }
 
 :deep(.el-select__wrapper) {
   border-radius: 12px;
-  box-shadow: 0 0 0 1px #E5E5EA inset;
+  box-shadow: 0 0 0 1px #D2D2D7 inset;
   transition: box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px #5AC8FA inset;
+  box-shadow: 0 0 0 1px #3B82F6 inset;
 }
 :deep(.el-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px #007AFF inset;
+  box-shadow: 0 0 0 1px #2563EB inset;
 }
 </style>

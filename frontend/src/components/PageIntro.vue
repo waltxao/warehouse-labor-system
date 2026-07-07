@@ -22,7 +22,7 @@ defineProps<{
 
 <style scoped>
 .page-intro {
-  background: #F2F2F7;
+  background: #F5F5F7;
   border-radius: 16px;
   padding: 20px 24px;
   margin-top: 24px;
@@ -33,7 +33,7 @@ defineProps<{
   gap: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #8E8E93;
+  color: #6E6E73;
   margin-bottom: 12px;
 }
 .intro-list {
@@ -43,7 +43,7 @@ defineProps<{
 }
 .intro-list li {
   font-size: 13px;
-  color: #8E8E93;
+  color: #6E6E73;
   line-height: 1.8;
   padding-left: 16px;
   position: relative;

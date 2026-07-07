@@ -61,7 +61,7 @@ async function handleLogin() {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #F2F2F7;
+  background: #F5F5F7;
 }
 .login-card {
   width: 400px;

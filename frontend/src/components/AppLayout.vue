@@ -114,6 +114,9 @@
           <span>{{ t('settings') }}</span>
         </div>
       </nav>
+      <div class="sidebar-footer">
+        <span class="version-text">v2.2.0 · Walt</span>
+      </div>
     </el-aside>
     <el-container>
       <el-header class="app-header">
@@ -136,9 +139,6 @@
       </el-header>
       <el-main>
         <router-view />
-        <div class="app-footer">
-          仓库人力数据分析系统 v2.2.0 · 作者：Walt · © 2026
-        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -186,7 +186,7 @@ function handleLogout() {
 
 <style scoped>
 .app-aside {
-  background: #1C1C1E;
+  background: #1D1D1F;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -227,7 +227,7 @@ function handleLogout() {
 .nav-item.active {
   background: rgba(255,255,255,0.12);
   color: #FFFFFF;
-  border-left: 3px solid #007AFF;
+  border-left: 3px solid #2563EB;
   font-weight: 600;
 }
 .nav-icon {
@@ -240,7 +240,7 @@ function handleLogout() {
   justify-content: space-between;
   align-items: center;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   border-bottom: none;
   z-index: 10;
 }
@@ -252,13 +252,16 @@ function handleLogout() {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #1C1C1E;
+  color: #1D1D1F;
   font-weight: 500;
 }
-.app-footer {
-  text-align: center;
-  padding: 16px 0 8px;
-  font-size: 12px;
-  color: #8E8E93;
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.version-text {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  font-family: 'Segoe UI', sans-serif;
 }
 </style>

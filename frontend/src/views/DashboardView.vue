@@ -36,14 +36,7 @@
       <div class="action-group">
         <el-button type="primary" @click="fetchData">查询</el-button>
         <el-button class="export-btn" @click="exportPng">导出 PNG</el-button>
-        <el-button
-          v-if="selectedWarehouse"
-          class="push-btn"
-          :loading="pushing"
-          @click="pushToWechat"
-        >
-          推送到企业微信
-        </el-button>
+        <el-button class="push-btn" :loading="pushing" @click="openPushDialog">推送到企业微信</el-button>
       </div>
     </div>
 
@@ -90,12 +83,38 @@
       </div>
     </div>
 
+    <!-- 推送对话框 -->
+    <el-dialog v-model="pushDialogVisible" title="推送到企业微信" width="500px">
+      <div v-if="!pushing && pushProgress.total === 0">
+        <p style="margin-bottom: 16px; color: #6E6E73;">选择要推送的仓库：</p>
+        <el-checkbox-group v-model="selectedPushWarehouses">
+          <el-checkbox v-for="wh in pushWarehouseOptions" :key="wh.code" :label="wh.code" :value="wh.code" style="display: block; margin-bottom: 8px;">
+            {{ wh.code }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div v-else>
+        <p style="margin-bottom: 12px;">正在推送 {{ pushProgress.current }}/{{ pushProgress.total }}...</p>
+        <div v-for="r in pushProgress.results" :key="r.code" style="margin-bottom: 6px; font-size: 13px;">
+          <span :style="{ color: r.success ? '#059669' : '#DC2626' }">{{ r.success ? '✓' : '✗' }}</span>
+          {{ r.code }} - {{ r.success ? '成功' : r.message }}
+        </div>
+      </div>
+      <template #footer v-if="!pushing && pushProgress.total === 0">
+        <el-button @click="pushDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="executePush">推送</el-button>
+      </template>
+      <template #footer v-else-if="!pushing && pushProgress.total > 0">
+        <el-button @click="pushDialogVisible = false; pushProgress = { current: 0, total: 0, results: [] }">关闭</el-button>
+      </template>
+    </el-dialog>
+
     <PageIntro :items="[
       '选择周次和仓库后点击查询，图表展示该周每日出勤人数与需求人力趋势',
-      '蓝色实线为实际出勤人数，浅蓝实线为实际需求人力，橙色虚线为近3月均值基线',
+      '蓝色实线为实际出勤人数，浅蓝实线为实际需求人力，灰色虚线为近3月均值基线',
       '上方KPI卡片显示周总出勤人次、需求人力、均值基线汇总数据',
       '点击导出 PNG 可保存当前图表为图片',
-      '选择单个仓库后，可点击推送到企业微信按钮将图表发送到对应仓库群'
+      '点击推送到企业微信按钮，可选择多个仓库批量推送图表'
     ]" />
   </div>
 </template>
@@ -112,7 +131,7 @@ function fmtNum(v: number): string {
 import TrendChart from "../components/TrendChart.vue";
 import client from "../api/client";
 import PageIntro from "../components/PageIntro.vue";
-import { pushChart } from "../api/webhook";
+import { pushChart, getWebhooks } from "../api/webhook";
 import { ElMessage } from "element-plus";
 
 interface WeekInfo {
@@ -222,33 +241,73 @@ function exportPng() {
   }
 }
 
-const pushing = ref(false);
+// 推送对话框
+const pushDialogVisible = ref(false)
+const pushWarehouseOptions = ref<{code: string, name: string}[]>([])
+const selectedPushWarehouses = ref<string[]>([])
+const pushing = ref(false)
+const pushProgress = ref({ current: 0, total: 0, results: [] as {code: string, success: boolean, message: string}[] })
 
-async function pushToWechat() {
-  if (!selectedWarehouse.value || !selectedWeek.value) return;
-  pushing.value = true;
+async function openPushDialog() {
+  // 获取已配置 webhook 的仓库列表
   try {
-    const dataUrl = chartRef.value?.getDataURL();
-    if (!dataUrl) {
-      ElMessage.error("图表导出失败");
-      return;
-    }
-    const base64 = dataUrl.split("base64,")[1] || dataUrl;
-    const resp: any = await pushChart({
-      warehouse_code: selectedWarehouse.value,
-      iso_week: selectedWeek.value,
-      chart_base64: base64,
-    });
-    if (resp?.code === 0) {
-      ElMessage.success("推送成功");
+    const resp: any = await getWebhooks()
+    if (resp?.code === 0 && resp.data) {
+      pushWarehouseOptions.value = resp.data.map((w: any) => ({
+        code: w.warehouse_code,
+        name: w.warehouse_name || w.warehouse_code
+      }))
+      selectedPushWarehouses.value = []
+      pushDialogVisible.value = true
     } else {
-      ElMessage.error(resp?.message || "推送失败");
+      ElMessage.warning("暂无已配置推送的仓库")
     }
-  } catch (e: any) {
-    ElMessage.error(e?.message || "推送失败");
-  } finally {
-    pushing.value = false;
+  } catch {
+    ElMessage.error("获取推送配置失败")
   }
+}
+
+async function executePush() {
+  if (selectedPushWarehouses.value.length === 0) {
+    ElMessage.warning("请选择至少一个仓库")
+    return
+  }
+  pushing.value = true
+  pushProgress.value = { current: 0, total: selectedPushWarehouses.value.length, results: [] }
+
+  const dataUrl = chartRef.value?.getDataURL()
+  if (!dataUrl) {
+    ElMessage.error("图表导出失败")
+    pushing.value = false
+    return
+  }
+  const base64 = dataUrl.split("base64,")[1] || dataUrl
+
+  for (const whCode of selectedPushWarehouses.value) {
+    try {
+      const resp: any = await pushChart({
+        warehouse_code: whCode,
+        iso_week: selectedWeek.value,
+        chart_base64: base64,
+      })
+      pushProgress.value.results.push({
+        code: whCode,
+        success: resp?.code === 0,
+        message: resp?.data?.message || resp?.message || ""
+      })
+    } catch (e: any) {
+      pushProgress.value.results.push({
+        code: whCode,
+        success: false,
+        message: e?.message || "推送失败"
+      })
+    }
+    pushProgress.value.current++
+  }
+
+  pushing.value = false
+  const successCount = pushProgress.value.results.filter(r => r.success).length
+  ElMessage.success(`推送完成: ${successCount}/${pushProgress.value.total} 成功`)
 }
 
 onMounted(async () => {
@@ -260,7 +319,7 @@ onMounted(async () => {
 <style scoped>
 .dashboard {
   padding: 20px;
-  background: #F2F2F7;
+  background: #F5F5F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -272,8 +331,8 @@ onMounted(async () => {
   background: #fff;
   padding: 16px 20px;
   border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #D2D2D7;
 }
 
 .filter-group {
@@ -288,62 +347,62 @@ onMounted(async () => {
 
 /* 查询按钮主色 */
 :deep(.el-button--primary) {
-  background-color: #007AFF;
-  border-color: #007AFF;
+  background-color: #2563EB;
+  border-color: #2563EB;
   font-weight: 500;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-button--primary:hover) {
-  background-color: #0051D5;
-  border-color: #0051D5;
+  background-color: #1D4ED8;
+  border-color: #1D4ED8;
 }
 
 /* 导出按钮边框样式 */
 :deep(.export-btn) {
   background: #fff;
-  border: 1px solid #E5E5EA;
-  color: #007AFF;
+  border: 1px solid #D2D2D7;
+  color: #2563EB;
   font-weight: 500;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.export-btn:hover) {
-  border-color: #007AFF;
-  color: #007AFF;
-  background: #F2F2F7;
+  border-color: #2563EB;
+  color: #2563EB;
+  background: #F5F5F7;
 }
 
 /* 筛选器样式覆盖 */
 :deep(.el-select__wrapper) {
   border-radius: 12px;
-  box-shadow: 0 0 0 1px #E5E5EA inset;
+  box-shadow: 0 0 0 1px #D2D2D7 inset;
   transition: box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px #5AC8FA inset;
+  box-shadow: 0 0 0 1px #3B82F6 inset;
 }
 :deep(.el-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px #007AFF inset;
+  box-shadow: 0 0 0 1px #2563EB inset;
 }
 
 .chart-description {
-  background: #FFF8E7;
+  background: #F5F5F7;
   border-radius: 16px;
   padding: 16px 20px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(255,149,0,0.10);
-  border-left: 4px solid #FF9500;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+  border-left: 4px solid #2563EB;
 }
 
 .desc-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1D1D1F;
   margin-bottom: 8px;
 }
 
 .desc-content {
   font-size: 13px;
-  color: #8E8E93;
+  color: #6E6E73;
   line-height: 1.8;
 }
 
@@ -353,11 +412,11 @@ onMounted(async () => {
 
 .desc-label {
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1D1D1F;
 }
 
 .desc-ps {
-  color: #8E8E93;
+  color: #6E6E73;
   font-style: italic;
   margin-top: 4px !important;
 }
@@ -373,19 +432,19 @@ onMounted(async () => {
   border-radius: 16px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #D2D2D7;
   transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .stat-card:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
 .stat-label {
   font-size: 14px;
-  color: #8E8E93;
+  color: #6E6E73;
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -393,20 +452,20 @@ onMounted(async () => {
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #1C1C1E;
-  font-family: 'SF Mono', ui-monospace, monospace;
+  color: #1D1D1F;
+  font-family: 'Cascadia Code', ui-monospace, monospace;
   letter-spacing: -0.02em;
 }
 
 :deep(.push-btn) {
-  background: #FF9500;
-  border: 1px solid #FF9500;
+  background: #2563EB;
+  border: 1px solid #2563EB;
   color: #fff;
   font-weight: 500;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.push-btn:hover) {
-  background: #E68600;
-  border-color: #E68600;
+  background: #1D4ED8;
+  border-color: #1D4ED8;
 }
 </style>

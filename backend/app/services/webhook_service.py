@@ -37,7 +37,7 @@ async def push_chart_to_wechat(
     )
     records = records_result.scalars().all()
 
-    # 4. 构建数据摘要
+    # 3. 构建数据摘要
     total_attendance = sum(r.actual_attendance or 0 for r in records)
     total_required = sum(r.required_headcount_so or 0 for r in records)
     if records:
@@ -46,17 +46,19 @@ async def push_chart_to_wechat(
     else:
         start_date = end_date = iso_week
 
-    summary = f"以上{start_date}-{end_date} {warehouse_code}倉實際出勤人數與實際需求人力情況"
-    summary += f"\n出勤人次：{total_attendance}"
-    summary += f"\n需求人力：{total_required}"
-    summary += f"\n請留意"
-
-    # 5. 通知人员手机号列表
-    mentioned_mobiles = []
+    # 通知人员昵称列表
+    nicknames = []
     if config.notify_users:
-        mentioned_mobiles = [p.strip() for p in config.notify_users.split(",") if p.strip()]
+        nicknames = [n.strip() for n in config.notify_users.split(",") if n.strip()]
 
-    # 6. 发送图片消息（企业微信群机器人支持 base64 图片）
+    # 构建 @ 昵称文本
+    mention_text = " ".join(f"@{n}" for n in nicknames)
+
+    # markdown 消息内容
+    md_content = f"{warehouse_code}倉實際出勤人數與實際需求人力情況图表\n\n"
+    md_content += f"**以上 {start_date}-{end_date} {warehouse_code}倉實際出勤人數與實際需求人力情況，请{mention_text} 留意**"
+
+    # 4. 发送图片消息
     # 确保 base64 不含前缀
     if "base64," in chart_base64:
         chart_base64 = chart_base64.split("base64,")[1]
@@ -71,12 +73,11 @@ async def push_chart_to_wechat(
         }
     }
 
-    # 7. 发送文字消息（含 @mention）
+    # 5. 发送 markdown 消息（含 @昵称）
     text_payload = {
-        "msgtype": "text",
-        "text": {
-            "content": summary,
-            "mentioned_mobile_list": mentioned_mobiles
+        "msgtype": "markdown",
+        "markdown": {
+            "content": md_content
         }
     }
 

@@ -96,7 +96,7 @@ async function doUpload() {
 <style scoped>
 .page-container {
   padding: 20px;
-  background: #F2F2F7;
+  background: #F5F5F7;
   min-height: calc(100vh - 60px);
 }
 
@@ -108,8 +108,8 @@ async function doUpload() {
   background: #fff;
   padding: 16px 20px;
   border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #D2D2D7;
 }
 
 .filter-group {
@@ -120,20 +120,20 @@ async function doUpload() {
 .page-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1D1D1F;
 }
 
 .content-card {
   background: #fff;
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #D2D2D7;
   transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .content-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
 .upload-wrapper {
@@ -148,29 +148,29 @@ async function doUpload() {
 }
 
 .upload-dragger :deep(.el-upload-dragger) {
-  border: 2px dashed #5AC8FA;
+  border: 2px dashed #3B82F6;
   border-radius: 16px;
-  background: #F2F2F7;
+  background: #F5F5F7;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
   padding: 48px 20px;
 }
 .upload-dragger :deep(.el-upload-dragger:hover) {
-  border-color: #007AFF;
-  background: #F2F2F7;
+  border-color: #2563EB;
+  background: #F5F5F7;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 .upload-dragger :deep(.el-icon--upload) {
-  color: #5AC8FA;
+  color: #3B82F6;
   font-size: 52px;
   margin-bottom: 8px;
 }
 .upload-dragger :deep(.el-upload__text) {
-  color: #1C1C1E;
+  color: #1D1D1F;
   font-size: 15px;
 }
 .upload-dragger :deep(.el-upload__tip) {
-  color: #8E8E93;
+  color: #6E6E73;
   font-size: 13px;
   margin-top: 8px;
 }
@@ -185,43 +185,43 @@ async function doUpload() {
 }
 
 :deep(.el-checkbox__label) {
-  color: #1C1C1E;
+  color: #1D1D1F;
   font-size: 14px;
 }
 
 :deep(.el-button--primary) {
-  background-color: #007AFF;
-  border-color: #007AFF;
+  background-color: #2563EB;
+  border-color: #2563EB;
   font-weight: 500;
   transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :deep(.el-button--primary:hover) {
-  background-color: #0051D5;
-  border-color: #0051D5;
+  background-color: #1D4ED8;
+  border-color: #1D4ED8;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,122,255,0.20);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.20);
 }
 
 /* 琥珀色说明卡 */
 .chart-description {
-  background: #FFF8E7;
+  background: #F5F5F7;
   border-radius: 16px;
   padding: 16px 20px;
   margin-top: 24px;
-  box-shadow: 0 1px 3px rgba(255,149,0,0.10);
-  border-left: 4px solid #FF9500;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+  border-left: 4px solid #2563EB;
 }
 
 .desc-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1D1D1F;
   margin-bottom: 8px;
 }
 
 .desc-content {
   font-size: 13px;
-  color: #8E8E93;
+  color: #6E6E73;
   line-height: 1.8;
 }
 
@@ -231,6 +231,6 @@ async function doUpload() {
 
 .desc-label {
   font-weight: 600;
-  color: #1C1C1E;
+  color: #1D1D1F;
 }
 </style>
