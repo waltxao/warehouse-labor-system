@@ -13,6 +13,7 @@ from app.core.exceptions import AppException
 
 
 WEEKDAY_NAMES = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+TRAD_WEEKDAY_NAMES = ['週日', '週一', '週二', '週三', '週四', '週五', '週六']
 
 
 def _format_date_label(date_str: str) -> str:
@@ -23,7 +24,7 @@ def _format_date_label(date_str: str) -> str:
             return str(date_str)
         y, m, d = int(parts[0]), int(parts[1]), int(parts[2])
         dt = datetime(y, m, d)
-        weekday = WEEKDAY_NAMES[dt.weekday() + 1] if dt.weekday() < 6 else WEEKDAY_NAMES[0]
+        weekday = TRAD_WEEKDAY_NAMES[dt.weekday() + 1] if dt.weekday() < 6 else TRAD_WEEKDAY_NAMES[0]
         return f"{parts[1]}/{parts[2]} {weekday}"
     except Exception:
         return str(date_str)
@@ -32,7 +33,7 @@ def _format_date_label(date_str: str) -> str:
 def generate_chart_png(days, attendance, required, avg, warehouse_code, date_range, total_attendance, total_required, total_avg):
     """生成三段式图表：说明区+折线图+KPI卡片"""
     # 设置中文字体，避免中文显示为方框
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'SimSun', 'KaiTi', 'FangSong', 'Microsoft JhengHei', 'STSong'] + ['sans-serif']
+    plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei', 'Microsoft YaHei', 'SimHei', 'SimSun', 'KaiTi', 'FangSong', 'STSong'] + ['sans-serif']
     plt.rcParams['axes.unicode_minus'] = False
 
     fig = plt.figure(figsize=(12, 10), dpi=150)
@@ -46,9 +47,9 @@ def generate_chart_png(days, attendance, required, avg, warehouse_code, date_ran
     ax_desc = fig.add_subplot(gs[0])
     ax_desc.axis('off')
     desc_text = (
-        "实际出勤人数：当日实际出勤人数（包含跟车、留仓、上门揽收等人员）\n"
-        "实际需求人力：按各工序效能参数预测的人力需求\n"
-        "历史需求人数均值：取近3个月实际需求人力计算的平均值，用作标准线"
+        "實際需求人力：按各工序效能係數預測的人力需求，其中：跟車、留倉計算：1人，上門開客、Partime計算：0.5人；\n"
+        "實際出勤人數：當日實際出勤人數，（包含跟車、留倉、上門開客等人員）；\n"
+        "歷史需求人數均值：取近3個月實際出勤人數計算的平均值，用作標準線"
     )
     ax_desc.text(0.05, 0.5, desc_text, fontsize=10, color='#6E6E73', va='center',
                 fontfamily='sans-serif', linespacing=1.8)
@@ -59,17 +60,17 @@ def generate_chart_png(days, attendance, required, avg, warehouse_code, date_ran
     x = range(len(days))
 
     # 出勤人数 - 蓝色实线
-    ax.plot(x, attendance, color='#2563EB', linewidth=2.5, marker='o', markersize=7, label='实际出勤人数', zorder=3)
+    ax.plot(x, attendance, color='#2563EB', linewidth=2.5, marker='o', markersize=7, label='實際出勤人數', zorder=3)
     ax.fill_between(x, attendance, alpha=0.08, color='#2563EB')
 
     # 需求人力 - 绿色实线
-    ax.plot(x, required, color='#059669', linewidth=2, marker='s', markersize=6, label='实际需求人力', zorder=2)
+    ax.plot(x, required, color='#059669', linewidth=2, marker='s', markersize=6, label='實際需求人力', zorder=2)
 
     # 历史均值 - 灰色虚线
     if avg and any(v > 0 for v in avg):
-        ax.plot(x, avg, color='#6B7280', linewidth=1.5, linestyle='--', label='历史需求人数均值', zorder=1)
+        ax.plot(x, avg, color='#6B7280', linewidth=1.5, linestyle='--', label='歷史需求人數均值', zorder=1)
 
-    ax.set_ylabel('人数', fontsize=11, color='#1D1D1F')
+    ax.set_ylabel('人數', fontsize=11, color='#1D1D1F')
     ax.set_title(f'{warehouse_code}倉實際出勤人數與實際需求人力情況 ({date_range})',
                 fontsize=14, color='#1D1D1F', fontweight='bold', pad=15)
     ax.set_xticks(list(x))
@@ -96,9 +97,9 @@ def generate_chart_png(days, attendance, required, avg, warehouse_code, date_ran
 
     card_width = 1/3
     cards = [
-        ('周总出勤人次', str(int(total_attendance)), '#2563EB'),
-        ('周总需求人力', f'{total_required:.1f}', '#059669'),
-        ('周历史需求人数均值', f'{total_avg:.1f}', '#6B7280'),
+        ('週總出勤人次', str(int(total_attendance)), '#2563EB'),
+        ('週總需求人力', f'{total_required:.1f}', '#059669'),
+        ('週歷史需求人數均值', f'{total_avg:.1f}', '#6B7280'),
     ]
     for i, (label, value, color) in enumerate(cards):
         x_start = i * card_width + 0.02
