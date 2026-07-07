@@ -36,7 +36,7 @@
       <div class="action-group">
         <el-button type="primary" @click="fetchData">查询</el-button>
         <el-button class="export-btn" @click="exportPng">导出 PNG</el-button>
-        <el-button class="push-btn" :loading="pushing" @click="openPushDialog">推送到企业微信</el-button>
+        <el-button class="push-btn" :loading="pushing" @click="pushToWechat">推送到企业微信</el-button>
       </div>
     </div>
 
@@ -84,28 +84,19 @@
     </div>
 
     <!-- 推送对话框 -->
-    <el-dialog v-model="pushDialogVisible" title="推送到企业微信" width="500px">
-      <div v-if="!pushing && pushProgress.total === 0">
-        <p style="margin-bottom: 16px; color: #6E6E73;">选择要推送的仓库：</p>
-        <el-checkbox-group v-model="selectedPushWarehouses">
-          <el-checkbox v-for="wh in pushWarehouseOptions" :key="wh.code" :label="wh.code" :value="wh.code" style="display: block; margin-bottom: 8px;">
-            {{ wh.code }}
-          </el-checkbox>
-        </el-checkbox-group>
-      </div>
-      <div v-else>
-        <p style="margin-bottom: 12px;">正在推送 {{ pushProgress.current }}/{{ pushProgress.total }}...</p>
-        <div v-for="r in pushProgress.results" :key="r.code" style="margin-bottom: 6px; font-size: 13px;">
+    <el-dialog v-model="pushDialogVisible" title="推送结果" width="500px">
+      <div v-if="pushResults">
+        <p style="margin-bottom: 12px; font-size: 14px; color: #1D1D1F;">
+          {{ pushResults.message }}
+        </p>
+        <div v-for="r in pushResults.results" :key="r.code" style="margin-bottom: 6px; font-size: 13px;">
           <span :style="{ color: r.success ? '#059669' : '#DC2626' }">{{ r.success ? '✓' : '✗' }}</span>
-          {{ r.code }} - {{ r.success ? '成功' : r.message }}
+          <span style="margin-left: 8px; font-weight: 500;">{{ r.code }}</span>
+          <span style="margin-left: 8px; color: #6E6E73;">{{ r.success ? '成功' : r.message }}</span>
         </div>
       </div>
-      <template #footer v-if="!pushing && pushProgress.total === 0">
-        <el-button @click="pushDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="executePush">推送</el-button>
-      </template>
-      <template #footer v-else-if="!pushing && pushProgress.total > 0">
-        <el-button @click="pushDialogVisible = false; pushProgress = { current: 0, total: 0, results: [] }">关闭</el-button>
+      <template #footer>
+        <el-button type="primary" @click="pushDialogVisible = false">关闭</el-button>
       </template>
     </el-dialog>
 
@@ -131,7 +122,7 @@ function fmtNum(v: number): string {
 import TrendChart from "../components/TrendChart.vue";
 import client from "../api/client";
 import PageIntro from "../components/PageIntro.vue";
-import { pushChart, getWebhooks } from "../api/webhook";
+import { pushAll } from "../api/webhook";
 import { ElMessage } from "element-plus";
 
 interface WeekInfo {

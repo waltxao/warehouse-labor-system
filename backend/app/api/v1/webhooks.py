@@ -13,7 +13,7 @@ from app.schemas.webhook import (
 )
 from app.schemas.common import ApiResponse
 from app.core.exceptions import AppException
-from app.services.webhook_service import push_chart_to_wechat
+from app.services.webhook_service import push_chart_to_wechat, push_all_to_wechat
 
 router = APIRouter(prefix="/api/v1/webhooks", tags=["webhooks"])
 
@@ -125,3 +125,16 @@ async def push_chart(
     return ApiResponse[PushResponse](
         data=PushResponse(success=result["success"], message=result["message"])
     )
+
+@router.post("/push-all")
+async def push_all(
+    req: dict,
+    user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    iso_week = req.get("iso_week", "")
+    if not iso_week:
+        raise AppException(400, "请提供周次")
+    result = await push_all_to_wechat(db=db, iso_week=iso_week)
+    return ApiResponse[dict](data=result)
+

@@ -19,3 +19,7 @@ export function deleteWebhook(id: number) {
 export function pushChart(data: { warehouse_code: string; iso_week: string; chart_base64: string }) {
   return client.post('/webhooks/push', data)
 }
+
+export function pushAll(data: { iso_week: string }) {
+  return client.post('/webhooks/push-all', data)
+}
