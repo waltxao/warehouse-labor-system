@@ -36,7 +36,6 @@
       <div class="action-group">
         <el-button type="primary" @click="fetchData">查询</el-button>
         <el-button class="export-btn" @click="exportPng">导出 PNG</el-button>
-        <el-button class="push-btn" :loading="pushing" @click="pushToWechat">推送到企业微信</el-button>
       </div>
     </div>
 
@@ -74,7 +73,7 @@
         <div class="stat-value">{{ totalRequired }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">周历史均值</div>
+        <div class="stat-label">周历史需求人数均值</div>
         <div class="stat-value">{{ totalAvg }}</div>
       </div>
       <div class="stat-card" v-if="!selectedWarehouse">
@@ -83,29 +82,11 @@
       </div>
     </div>
 
-    <!-- 推送对话框 -->
-    <el-dialog v-model="pushDialogVisible" title="推送结果" width="500px">
-      <div v-if="pushResults">
-        <p style="margin-bottom: 12px; font-size: 14px; color: #1D1D1F;">
-          {{ pushResults.message }}
-        </p>
-        <div v-for="r in pushResults.results" :key="r.code" style="margin-bottom: 6px; font-size: 13px;">
-          <span :style="{ color: r.success ? '#059669' : '#DC2626' }">{{ r.success ? '✓' : '✗' }}</span>
-          <span style="margin-left: 8px; font-weight: 500;">{{ r.code }}</span>
-          <span style="margin-left: 8px; color: #6E6E73;">{{ r.success ? '成功' : r.message }}</span>
-        </div>
-      </div>
-      <template #footer>
-        <el-button type="primary" @click="pushDialogVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
-
     <PageIntro :items="[
       '选择周次和仓库后点击查询，图表展示该周每日出勤人数与需求人力趋势',
-      '蓝色实线为实际出勤人数，浅蓝实线为实际需求人力，灰色虚线为历史均值基线',
+      '蓝色实线为实际出勤人数，浅蓝实线为实际需求人力，灰色虚线为历史需求人数均值基线',
       '上方KPI卡片显示周总出勤人次、需求人力、均值基线汇总数据',
-      '点击导出 PNG 可保存当前图表为图片',
-      '点击推送到企业微信按钮，可选择多个仓库批量推送图表'
+      '点击导出 PNG 可保存当前图表为图片'
     ]" />
   </div>
 </template>
@@ -122,8 +103,6 @@ function fmtNum(v: number): string {
 import TrendChart from "../components/TrendChart.vue";
 import client from "../api/client";
 import PageIntro from "../components/PageIntro.vue";
-import { pushAll } from "../api/webhook";
-import { ElMessage } from "element-plus";
 
 interface WeekInfo {
   iso_week: string;
@@ -229,34 +208,6 @@ function exportPng() {
     a.href = url;
     a.download = `warehouse-trend-${selectedWeek.value}.png`;
     a.click();
-  }
-}
-
-// 推送
-const pushing = ref(false)
-const pushDialogVisible = ref(false)
-const pushResults = ref<{total: number, success_count: number, fail_count: number, results: {code: string, success: boolean, message: string}[]} | null>(null)
-
-async function pushToWechat() {
-  if (!selectedWeek.value) {
-    ElMessage.warning("请先选择周次")
-    return
-  }
-  pushing.value = true
-  pushResults.value = null
-  try {
-    const resp: any = await pushAll({ iso_week: selectedWeek.value })
-    if (resp?.code === 0 && resp.data) {
-      pushResults.value = resp.data
-      pushDialogVisible.value = true
-      ElMessage.success(resp.data.message || "推送完成")
-    } else {
-      ElMessage.error(resp?.message || "推送失败")
-    }
-  } catch (e: any) {
-    ElMessage.error(e?.message || "推送失败")
-  } finally {
-    pushing.value = false
   }
 }
 
@@ -407,15 +358,4 @@ onMounted(async () => {
   letter-spacing: -0.02em;
 }
 
-:deep(.push-btn) {
-  background: #2563EB;
-  border: 1px solid #2563EB;
-  color: #fff;
-  font-weight: 500;
-  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-:deep(.push-btn:hover) {
-  background: #1D4ED8;
-  border-color: #1D4ED8;
-}
 </style>

@@ -8,6 +8,10 @@ class WebhookConfigBase(BaseModel):
     webhook_url: str
     notify_users: Optional[str] = None
     is_active: bool = True
+    message_template: Optional[str] = None
+    schedule_enabled: bool = False
+    schedule_day: Optional[int] = None
+    schedule_time: Optional[str] = None
 
 
 class WebhookConfigCreate(WebhookConfigBase):
@@ -18,6 +22,10 @@ class WebhookConfigUpdate(BaseModel):
     webhook_url: Optional[str] = None
     notify_users: Optional[str] = None
     is_active: Optional[bool] = None
+    message_template: Optional[str] = None
+    schedule_enabled: Optional[bool] = None
+    schedule_day: Optional[int] = None
+    schedule_time: Optional[str] = None
 
 
 class WebhookConfigResponse(WebhookConfigBase):
@@ -35,6 +43,11 @@ class PushRequest(BaseModel):
     warehouse_code: str
     iso_week: str
     chart_base64: str  # PNG base64，不含 data:image/png;base64, 前缀
+
+
+class PushAllRequest(BaseModel):
+    iso_week: str
+    warehouse_codes: list[str]
 
 
 class PushResponse(BaseModel):

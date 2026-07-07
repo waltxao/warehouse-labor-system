@@ -9,6 +9,7 @@ from app.schemas.webhook import (
     WebhookConfigUpdate,
     WebhookConfigResponse,
     PushRequest,
+    PushAllRequest,
     PushResponse,
 )
 from app.schemas.common import ApiResponse
@@ -35,6 +36,10 @@ async def list_webhooks(
             webhook_url=cfg.webhook_url,
             notify_users=cfg.notify_users,
             is_active=cfg.is_active,
+            message_template=cfg.message_template,
+            schedule_enabled=cfg.schedule_enabled,
+            schedule_day=cfg.schedule_day,
+            schedule_time=cfg.schedule_time,
             warehouse_code=wh.code,
             warehouse_name=wh.name,
             created_at=cfg.created_at,
@@ -66,6 +71,10 @@ async def create_webhook(
         config.webhook_url = req.webhook_url
         config.notify_users = req.notify_users
         config.is_active = req.is_active
+        config.message_template = req.message_template
+        config.schedule_enabled = req.schedule_enabled
+        config.schedule_day = req.schedule_day
+        config.schedule_time = req.schedule_time
     else:
         config = WebhookConfig(**req.model_dump())
         db.add(config)
@@ -91,8 +100,56 @@ async def update_webhook(
         config.notify_users = req.notify_users
     if req.is_active is not None:
         config.is_active = req.is_active
+    if req.message_template is not None:
+        config.message_template = req.message_template
+    if req.schedule_enabled is not None:
+        config.schedule_enabled = req.schedule_enabled
+    if req.schedule_day is not None:
+        config.schedule_day = req.schedule_day
+    if req.schedule_time is not None:
+        config.schedule_time = req.schedule_time
     await db.commit()
     return ApiResponse[dict](data={"id": config.id})
+
+
+@router.put("/{webhook_id}/schedule")
+async def update_schedule(
+    webhook_id: int,
+    req: dict,
+    user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    """更新定时推送配置（schedule_enabled / schedule_day / schedule_time）"""
+    result = await db.execute(select(WebhookConfig).where(WebhookConfig.id == webhook_id))
+    config = result.scalar_one_or_none()
+    if not config:
+        raise AppException(404, "Webhook 配置不存在")
+
+    if "schedule_enabled" in req and req["schedule_enabled"] is not None:
+        config.schedule_enabled = bool(req["schedule_enabled"])
+    if "schedule_day" in req and req["schedule_day"] is not None:
+        day = int(req["schedule_day"])
+        if day < 0 or day > 6:
+            raise AppException(400, "schedule_day 取值范围 0-6（0=周一...6=周日）")
+        config.schedule_day = day
+    if "schedule_time" in req and req["schedule_time"] is not None:
+        time_str = str(req["schedule_time"]).strip()
+        # 简单校验 HH:MM
+        try:
+            h, m = time_str.split(":")
+            if not (0 <= int(h) <= 23 and 0 <= int(m) <= 59):
+                raise ValueError
+        except Exception:
+            raise AppException(400, "schedule_time 格式应为 HH:MM")
+        config.schedule_time = time_str
+
+    await db.commit()
+    return ApiResponse[dict](data={
+        "id": config.id,
+        "schedule_enabled": config.schedule_enabled,
+        "schedule_day": config.schedule_day,
+        "schedule_time": config.schedule_time,
+    })
 
 
 @router.delete("/{webhook_id}")
@@ -126,6 +183,7 @@ async def push_chart(
         data=PushResponse(success=result["success"], message=result["message"])
     )
 
+
 @router.post("/push-all")
 async def push_all(
     req: dict,
@@ -133,8 +191,8 @@ async def push_all(
     db: AsyncSession = Depends(get_db),
 ):
     iso_week = req.get("iso_week", "")
+    warehouse_codes = req.get("warehouse_codes", [])
     if not iso_week:
         raise AppException(400, "请提供周次")
-    result = await push_all_to_wechat(db=db, iso_week=iso_week)
+    result = await push_all_to_wechat(db=db, iso_week=iso_week, warehouse_codes=warehouse_codes)
     return ApiResponse[dict](data=result)
-

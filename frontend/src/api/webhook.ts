@@ -20,6 +20,6 @@ export function pushChart(data: { warehouse_code: string; iso_week: string; char
   return client.post('/webhooks/push', data)
 }
 
-export function pushAll(data: { iso_week: string }) {
+export function pushAll(data: { iso_week: string; warehouse_codes: string[] }) {
   return client.post('/webhooks/push-all', data)
 }

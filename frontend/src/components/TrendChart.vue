@@ -8,12 +8,12 @@
           實際出勤人數
         </span>
         <span class="legend-item">
-          <span class="legend-dot" style="background: #3B82F6;"></span>
+          <span class="legend-dot" style="background: #059669;"></span>
           實際需求人力
         </span>
         <span class="legend-item">
           <span class="legend-line" style="border-top: 2px dashed #6B7280;"></span>
-          历史均值
+          历史需求人数均值
         </span>
       </div>
     </div>
@@ -139,20 +139,20 @@ function renderChart() {
         smooth: true,
         symbol: "circle",
         symbolSize: 8,
-        itemStyle: { color: "#3B82F6" },
-        lineStyle: { width: 3, color: "#3B82F6" },
+        itemStyle: { color: "#059669" },
+        lineStyle: { width: 3, color: "#059669" },
         label: {
           show: true,
           position: "top",
           fontFamily: "'Cascadia Code', ui-monospace, monospace",
           fontSize: 12,
-          color: "#3B82F6",
+          color: "#059669",
           fontWeight: "bold",
           formatter: (p: any) => { if (!p.value) return ""; const r = Math.round(p.value * 100) / 100; return r % 1 === 0 ? String(r) : String(parseFloat(r.toFixed(2))); },
         },
       },
       {
-        name: "历史均值",
+        name: "历史需求人数均值",
         type: "line",
         data: props.avgSums,
         smooth: true,

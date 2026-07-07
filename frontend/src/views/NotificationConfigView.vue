@@ -73,6 +73,33 @@
         <el-form-item label="启用状态">
           <el-switch v-model="form.is_active" />
         </el-form-item>
+        <el-form-item label="推送文字模板">
+          <el-input
+            v-model="form.message_template"
+            type="textarea"
+            :rows="4"
+            placeholder="留空使用默认模板。支持变量：{warehouse} {date_range} {notify_users} {total_attendance} {total_required}"
+          />
+        </el-form-item>
+        <el-form-item label="定时推送">
+          <el-switch v-model="form.schedule_enabled" />
+        </el-form-item>
+        <template v-if="form.schedule_enabled">
+          <el-form-item label="推送日期">
+            <el-select v-model="form.schedule_day" style="width: 100%">
+              <el-option label="周一" :value="0" />
+              <el-option label="周二" :value="1" />
+              <el-option label="周三" :value="2" />
+              <el-option label="周四" :value="3" />
+              <el-option label="周五" :value="4" />
+              <el-option label="周六" :value="5" />
+              <el-option label="周日" :value="6" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="推送时间">
+            <el-time-picker v-model="form.schedule_time" format="HH:mm" value-format="HH:mm" placeholder="选择时间" style="width: 100%" />
+          </el-form-item>
+        </template>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -105,6 +132,10 @@ interface WebhookConfig {
   webhook_url: string
   notify_users: string | null
   is_active: boolean
+  message_template: string | null
+  schedule_enabled: boolean
+  schedule_day: number
+  schedule_time: string
 }
 
 interface WarehouseInfo {
@@ -126,6 +157,10 @@ const form = reactive({
   webhook_url: '',
   notify_users: '',
   is_active: true,
+  message_template: '',
+  schedule_enabled: false,
+  schedule_day: 0,
+  schedule_time: '09:00',
 })
 
 async function fetchConfigs() {
@@ -160,6 +195,10 @@ function openCreate() {
   form.webhook_url = ''
   form.notify_users = ''
   form.is_active = true
+  form.message_template = ''
+  form.schedule_enabled = false
+  form.schedule_day = 0
+  form.schedule_time = '09:00'
   dialogVisible.value = true
 }
 
@@ -170,6 +209,10 @@ function openEdit(row: WebhookConfig) {
   form.webhook_url = row.webhook_url
   form.notify_users = row.notify_users || ''
   form.is_active = row.is_active
+  form.message_template = (row as any).message_template || ''
+  form.schedule_enabled = (row as any).schedule_enabled || false
+  form.schedule_day = (row as any).schedule_day ?? 0
+  form.schedule_time = (row as any).schedule_time || '09:00'
   dialogVisible.value = true
 }
 
@@ -189,14 +232,22 @@ async function handleSave() {
         webhook_url: form.webhook_url,
         notify_users: form.notify_users,
         is_active: form.is_active,
-      })
+        message_template: form.message_template,
+        schedule_enabled: form.schedule_enabled,
+        schedule_day: form.schedule_day,
+        schedule_time: form.schedule_time,
+      } as any)
       ElMessage.success('更新成功')
     } else {
       await createWebhook({
         warehouse_id: form.warehouse_id,
         webhook_url: form.webhook_url,
         notify_users: form.notify_users,
-      })
+        message_template: form.message_template,
+        schedule_enabled: form.schedule_enabled,
+        schedule_day: form.schedule_day,
+        schedule_time: form.schedule_time,
+      } as any)
       ElMessage.success('创建成功')
     }
     dialogVisible.value = false
