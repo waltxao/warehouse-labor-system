@@ -232,73 +232,32 @@ function exportPng() {
   }
 }
 
-// 推送对话框
-const pushDialogVisible = ref(false)
-const pushWarehouseOptions = ref<{code: string, name: string}[]>([])
-const selectedPushWarehouses = ref<string[]>([])
+// 推送
 const pushing = ref(false)
-const pushProgress = ref({ current: 0, total: 0, results: [] as {code: string, success: boolean, message: string}[] })
+const pushDialogVisible = ref(false)
+const pushResults = ref<{total: number, success_count: number, fail_count: number, results: {code: string, success: boolean, message: string}[]} | null>(null)
 
-async function openPushDialog() {
-  // 获取已配置 webhook 的仓库列表
-  try {
-    const resp: any = await getWebhooks()
-    if (resp?.code === 0 && resp.data) {
-      pushWarehouseOptions.value = resp.data.map((w: any) => ({
-        code: w.warehouse_code,
-        name: w.warehouse_name || w.warehouse_code
-      }))
-      selectedPushWarehouses.value = []
-      pushDialogVisible.value = true
-    } else {
-      ElMessage.warning("暂无已配置推送的仓库")
-    }
-  } catch {
-    ElMessage.error("获取推送配置失败")
-  }
-}
-
-async function executePush() {
-  if (selectedPushWarehouses.value.length === 0) {
-    ElMessage.warning("请选择至少一个仓库")
+async function pushToWechat() {
+  if (!selectedWeek.value) {
+    ElMessage.warning("请先选择周次")
     return
   }
   pushing.value = true
-  pushProgress.value = { current: 0, total: selectedPushWarehouses.value.length, results: [] }
-
-  const dataUrl = chartRef.value?.getDataURL()
-  if (!dataUrl) {
-    ElMessage.error("图表导出失败")
-    pushing.value = false
-    return
-  }
-  const base64 = dataUrl.split("base64,")[1] || dataUrl
-
-  for (const whCode of selectedPushWarehouses.value) {
-    try {
-      const resp: any = await pushChart({
-        warehouse_code: whCode,
-        iso_week: selectedWeek.value,
-        chart_base64: base64,
-      })
-      pushProgress.value.results.push({
-        code: whCode,
-        success: resp?.code === 0,
-        message: resp?.data?.message || resp?.message || ""
-      })
-    } catch (e: any) {
-      pushProgress.value.results.push({
-        code: whCode,
-        success: false,
-        message: e?.message || "推送失败"
-      })
+  pushResults.value = null
+  try {
+    const resp: any = await pushAll({ iso_week: selectedWeek.value })
+    if (resp?.code === 0 && resp.data) {
+      pushResults.value = resp.data
+      pushDialogVisible.value = true
+      ElMessage.success(resp.data.message || "推送完成")
+    } else {
+      ElMessage.error(resp?.message || "推送失败")
     }
-    pushProgress.value.current++
+  } catch (e: any) {
+    ElMessage.error(e?.message || "推送失败")
+  } finally {
+    pushing.value = false
   }
-
-  pushing.value = false
-  const successCount = pushProgress.value.results.filter(r => r.success).length
-  ElMessage.success(`推送完成: ${successCount}/${pushProgress.value.total} 成功`)
 }
 
 onMounted(async () => {
