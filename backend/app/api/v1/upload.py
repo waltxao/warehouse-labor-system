@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/v1/upload", tags=["upload"])
 
 
 async def _bg_compute_averages(iso_week: str):
-    """后台任务：创建独立 session 计算近3月均值。"""
+    """后台任务：创建独立 session 计算历史均值。"""
     async with async_session() as session:
         await compute_averages(session, iso_week)
 
@@ -53,7 +53,7 @@ async def upload_excel(
     # 解析 Excel
     report = await parse_excel(file_path, db, user.id, force_overwrite)
 
-    # 后台任务：计算3月均值 + 运行告警检查（使用独立 session）
+    # 后台任务：计算历史均值 + 运行告警检查（使用独立 session）
     background_tasks.add_task(_bg_compute_averages, report.iso_week)
     background_tasks.add_task(_bg_run_alert_checks, report.iso_week)
 

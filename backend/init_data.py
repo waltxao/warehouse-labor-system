@@ -8,7 +8,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 WAREHOUSES = [
     "101D", "1800", "101G", "102H", "1200",
-    "1050", "1400", "1450", "1600",
+    "1050", "1400", "1450", "1600", "CA12",
     "101A", "101B", "102B", "1070", "CA11", "GA11",
 ]
 

@@ -5,7 +5,7 @@ from app.models import DailyRecord, ThreeMonthAverage, Warehouse
 
 
 async def compute_averages(db: AsyncSession, iso_week: str) -> int:
-    """计算指定 ISO 周次的近3月需求人力平均值。
+    """计算指定 ISO 周次的历史均值。\n    CA12 仓库在当前周次之前直接套用 1450 的均值数据。
     滚动窗口：往前推 3 个月，取同一星期几的实际工作需求人数(SO)求平均。
     """
     # 解析 iso_week (如 "2026-W24")
@@ -66,6 +66,43 @@ async def compute_averages(db: AsyncSession, iso_week: str) -> int:
                 sample_count=sample_count,
             )
             db.add(avg_record)
+            count += 1
+
+    # CA12 特殊处理：当前周次之前的均值直接套用 1450 的数据
+    ca12_result = await db.execute(select(Warehouse).where(Warehouse.code == "CA12"))
+    ca12 = ca12_result.scalar_one_or_none()
+    wh1450_result = await db.execute(select(Warehouse).where(Warehouse.code == "1450"))
+    wh1450 = wh1450_result.scalar_one_or_none()
+
+    if ca12 and wh1450:
+        # 查询 1450 在当前 iso_week 之前的所有均值记录
+        avg_1450_result = await db.execute(
+            select(ThreeMonthAverage).where(
+                ThreeMonthAverage.warehouse_id == wh1450.id,
+                ThreeMonthAverage.iso_week < iso_week,
+            )
+        )
+        avg_1450_records = avg_1450_result.scalars().all()
+
+        # 删除 CA12 旧的套用记录（当前周次之前的）
+        await db.execute(
+            delete(ThreeMonthAverage).where(
+                ThreeMonthAverage.warehouse_id == ca12.id,
+                ThreeMonthAverage.iso_week < iso_week,
+            )
+        )
+
+        # 复制 1450 的均值记录到 CA12
+        for rec in avg_1450_records:
+            ca12_avg = ThreeMonthAverage(
+                warehouse_id=ca12.id,
+                iso_week=rec.iso_week,
+                day_of_week=rec.day_of_week,
+                average_value=rec.average_value,
+                is_partial=rec.is_partial,
+                sample_count=rec.sample_count,
+            )
+            db.add(ca12_avg)
             count += 1
 
     await db.commit()

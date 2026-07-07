@@ -47,7 +47,7 @@ def generate_chart_png(days: list, attendance: list, required: list, avg: list, 
 
     # 均值基线
     if avg and any(v > 0 for v in avg):
-        ax.plot(x, avg, color='#6B7280', linewidth=1.5, linestyle='--', label='近3月均值基线', zorder=1)
+        ax.plot(x, avg, color='#6B7280', linewidth=1.5, linestyle='--', label='历史均值基线', zorder=1)
 
     ax.set_xlabel('', fontsize=11, color='#1D1D1F')
     ax.set_ylabel('人数', fontsize=11, color='#1D1D1F')

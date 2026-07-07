@@ -48,7 +48,7 @@
       <div class="desc-content">
         <p><span class="desc-label">實際需求人力：</span>按各工序效能係數預測的人力需求，其中：跟車、留倉計算：1人，上門開客、Partime計算：0.5人；</p>
         <p><span class="desc-label">實際出勤人數：</span>當日實際出勤人數，（包含跟車、留倉、上門開客等人員）；</p>
-        <p><span class="desc-label">近3月實際需求人力平均值：</span>取近3個月實際出勤人數計算的平均值，用作標準線；</p>
+        <p><span class="desc-label">歷史均值：</span>取近3個月實際出勤人數計算的平均值，用作標準線；</p>
         <p class="desc-ps">Ps：每週PST週日更新數據，同步渠道：【🔁區域經理】</p>
       </div>
     </div>
@@ -74,7 +74,7 @@
         <div class="stat-value">{{ totalRequired }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">周总均值基线</div>
+        <div class="stat-label">周历史均值</div>
         <div class="stat-value">{{ totalAvg }}</div>
       </div>
       <div class="stat-card" v-if="!selectedWarehouse">
@@ -102,7 +102,7 @@
 
     <PageIntro :items="[
       '选择周次和仓库后点击查询，图表展示该周每日出勤人数与需求人力趋势',
-      '蓝色实线为实际出勤人数，浅蓝实线为实际需求人力，灰色虚线为近3月均值基线',
+      '蓝色实线为实际出勤人数，浅蓝实线为实际需求人力，灰色虚线为历史均值基线',
       '上方KPI卡片显示周总出勤人次、需求人力、均值基线汇总数据',
       '点击导出 PNG 可保存当前图表为图片',
       '点击推送到企业微信按钮，可选择多个仓库批量推送图表'

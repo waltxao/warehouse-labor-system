@@ -13,7 +13,7 @@
         </span>
         <span class="legend-item">
           <span class="legend-line" style="border-top: 2px dashed #6B7280;"></span>
-          近3月需求人力平均值
+          历史均值
         </span>
       </div>
     </div>
@@ -152,7 +152,7 @@ function renderChart() {
         },
       },
       {
-        name: "近3月需求人力平均值",
+        name: "历史均值",
         type: "line",
         data: props.avgSums,
         smooth: true,
