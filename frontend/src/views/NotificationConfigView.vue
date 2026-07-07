@@ -75,31 +75,21 @@
         </el-form-item>
         <el-form-item label="推送文字模板">
           <el-input
+            ref="templateRef"
             v-model="form.message_template"
             type="textarea"
             :rows="4"
-            placeholder="留空使用默认模板。支持变量：{warehouse} {date_range} {notify_users} {total_attendance} {total_required}"
+            placeholder="留空使用默认模板"
           />
+          <div class="var-tags">
+            <span class="var-tag" @click="insertVar('{warehouse}')">{warehouse} 仓库代码</span>
+            <span class="var-tag" @click="insertVar('{date_range}')">{date_range} 日期范围</span>
+            <span class="var-tag" @click="insertVar('{notify_users}')">{notify_users} 通知人员</span>
+            <span class="var-tag" @click="insertVar('{total_attendance}')">{total_attendance} 出勤人次</span>
+            <span class="var-tag" @click="insertVar('{total_required}')">{total_required} 需求人力</span>
+          </div>
         </el-form-item>
-        <el-form-item label="定时推送">
-          <el-switch v-model="form.schedule_enabled" />
-        </el-form-item>
-        <template v-if="form.schedule_enabled">
-          <el-form-item label="推送日期">
-            <el-select v-model="form.schedule_day" style="width: 100%">
-              <el-option label="周一" :value="0" />
-              <el-option label="周二" :value="1" />
-              <el-option label="周三" :value="2" />
-              <el-option label="周四" :value="3" />
-              <el-option label="周五" :value="4" />
-              <el-option label="周六" :value="5" />
-              <el-option label="周日" :value="6" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="推送时间">
-            <el-time-picker v-model="form.schedule_time" format="HH:mm" value-format="HH:mm" placeholder="选择时间" style="width: 100%" />
-          </el-form-item>
-        </template>
+
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -148,6 +138,7 @@ const configs = ref<WebhookConfig[]>([])
 const warehouses = ref<WarehouseInfo[]>([])
 const loading = ref(false)
 const saving = ref(false)
+const templateRef = ref<any>(null)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const editId = ref<number | null>(null)
@@ -186,6 +177,22 @@ async function fetchWarehouses() {
   } catch (e) {
     /* 忽略 */
   }
+}
+
+function insertVar(varName: string) {
+  const el = templateRef.value?.textarea
+  if (!el) {
+    form.message_template = (form.message_template || '') + varName
+    return
+  }
+  const start = el.selectionStart
+  const end = el.selectionEnd
+  const text = form.message_template || ''
+  form.message_template = text.substring(0, start) + varName + text.substring(end)
+  nextTick(() => {
+    el.focus()
+    el.selectionStart = el.selectionEnd = start + varName.length
+  })
 }
 
 function openCreate() {
@@ -407,5 +414,27 @@ onMounted(async () => {
 :deep(.el-switch.is-checked .el-switch__core) {
   background-color: #30D158;
   border-color: #30D158;
+}
+.var-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.var-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  font-size: 12px;
+  color: #2563EB;
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  user-select: none;
+}
+.var-tag:hover {
+  background: #DBEAFE;
+  border-color: #2563EB;
 }
 </style>
