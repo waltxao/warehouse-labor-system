@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import WebhookConfig, Warehouse, DailyRecord
+from app.models import WebhookConfig, Warehouse, DailyRecord, ThreeMonthAverage
 from app.core.exceptions import AppException
 
 
@@ -192,7 +192,22 @@ async def push_all_to_wechat(db: AsyncSession, iso_week: str) -> dict:
             days = [str(r.date) for r in records]
             attendance = [r.actual_attendance or 0 for r in records]
             required = [r.required_headcount_so or 0 for r in records]
-            avg = [r.three_month_avg or 0 for r in records]
+
+            # 从 ThreeMonthAverage 表查询历史均值
+            dow_list = [r.day_of_week for r in records]
+            avg_map = {}
+            if dow_list:
+                avg_result = await db.execute(
+                    select(ThreeMonthAverage).where(
+                        ThreeMonthAverage.warehouse_id == warehouse.id,
+                        ThreeMonthAverage.iso_week == iso_week,
+                        ThreeMonthAverage.day_of_week.in_(dow_list)
+                    )
+                )
+                for a in avg_result.scalars().all():
+                    avg_map[a.day_of_week] = a.average_value
+            avg = [avg_map.get(dow, 0) for dow in dow_list]
+
             date_range = f"{days[0]}~{days[-1]}" if days else iso_week
 
             # 生成图表
