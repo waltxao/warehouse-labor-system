@@ -1,24 +1,26 @@
 <template>
-  <el-card>
-    <h3>系统设置</h3>
-    <el-form label-width="120px" style="max-width: 480px">
-      <el-form-item label="暗色主题">
-        <el-switch v-model="isDark" @change="toggleDark" />
-      </el-form-item>
-      <el-form-item label="界面语言">
-        <el-radio-group v-model="lang" @change="changeLocale">
-          <el-radio-button value="zh-CN">简体中文</el-radio-button>
-          <el-radio-button value="zh-TW">繁體中文</el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-    </el-form>
+  <div class="page-container">
+    <div class="content-card">
+      <h3>系统设置</h3>
+      <el-form label-width="120px" style="max-width: 480px">
+        <el-form-item label="暗色主题">
+          <el-switch v-model="isDark" @change="toggleDark" />
+        </el-form-item>
+        <el-form-item label="界面语言">
+          <el-radio-group v-model="lang" @change="changeLocale">
+            <el-radio-button value="zh-CN">简体中文</el-radio-button>
+            <el-radio-button value="zh-TW">繁體中文</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+    </div>
 
     <PageIntro :items="[
       '切换系统语言（简体中文 / 繁体中文）',
       '语言设置自动保存，刷新页面后保持',
       '仅管理员可访问系统设置'
     ]" />
-  </el-card>
+  </div>
 </template>
 
 <script setup lang="ts">

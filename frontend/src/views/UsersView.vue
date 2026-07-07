@@ -1,17 +1,19 @@
 <template>
-  <el-card>
-    <el-button type="primary" @click="showDialog = true">新建用户</el-button>
-    <el-table :data="users" border stripe style="margin-top: 12px">
-      <el-table-column prop="username" label="用户名" />
-      <el-table-column prop="role" label="角色" />
-      <el-table-column prop="is_active" label="状态">
-        <template #default="{ row }">
-          <el-tag :type="row.is_active ? 'success' : 'danger'">
-            {{ row.is_active ? '启用' : '停用' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-    </el-table>
+  <div class="page-container">
+    <div class="content-card">
+      <el-button type="primary" @click="showDialog = true">新建用户</el-button>
+      <el-table :data="users" border stripe style="margin-top: 12px">
+        <el-table-column prop="username" label="用户名" />
+        <el-table-column prop="role" label="角色" />
+        <el-table-column prop="is_active" label="状态">
+          <template #default="{ row }">
+            <el-tag :type="row.is_active ? 'success' : 'danger'">
+              {{ row.is_active ? '启用' : '停用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <el-dialog v-model="showDialog" title="新建用户" width="480px">
       <el-form label-width="80px">
@@ -37,7 +39,7 @@
       '全局查看员可查看所有仓库数据但不能上传或管理',
       '点击编辑可修改用户信息和仓库绑定'
     ]" />
-  </el-card>
+  </div>
 </template>
 
 <script setup lang="ts">

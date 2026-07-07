@@ -17,15 +17,7 @@
         <el-table-column label="Webhook URL" min-width="260">
           <template #default="{ row }">
             <span class="url-cell" :title="row.webhook_url">{{ row.webhook_url }}</span>
-          
-    <PageIntro :items="[
-      '为每个仓库配置企业微信 Webhook 地址和通知人员昵称',
-      '通知人员昵称使用英文逗号分隔，如：张三,李四',
-      '配置完成后，在总览页可点击推送按钮将图表发送到企业微信群',
-      '推送消息包含图表截图和 markdown 富文本，并@通知人员昵称',
-      '仅管理员可访问此页面'
-    ]" />
-</template>
+          </template>
         </el-table-column>
         <el-table-column prop="notify_users" label="通知人员" min-width="160">
           <template #default="{ row }">
@@ -87,6 +79,14 @@
         <el-button class="primary-btn" :loading="saving" @click="handleSave">保存</el-button>
       </template>
     </el-dialog>
+
+    <PageIntro :items="[
+      '为每个仓库配置企业微信 Webhook 地址和通知人员昵称',
+      '通知人员昵称使用英文逗号分隔，如：张三,李四',
+      '配置完成后，在总览页可点击推送按钮将图表发送到企业微信群',
+      '推送消息包含图表截图和 markdown 富文本，并@通知人员昵称',
+      '仅管理员可访问此页面'
+    ]" />
   </div>
 </template>
 
