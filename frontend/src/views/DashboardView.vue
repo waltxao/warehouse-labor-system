@@ -62,6 +62,22 @@
       :title="chartTitle"
     />
 
+    <!-- 详细数据表格 -->
+    <div class="detail-table">
+      <el-table :data="tableData" stripe border style="width: 100%">
+        <el-table-column prop="metric" label="指標" width="180" fixed />
+        <el-table-column
+          v-for="(day, i) in chartData.days"
+          :key="i"
+          :prop="`d${i}`"
+          :label="day"
+          align="center"
+          :formatter="fmtCell"
+        />
+        <el-table-column prop="total" label="匯總" width="120" align="center" :formatter="fmtCell" />
+      </el-table>
+    </div>
+
     <!-- 数据概览 -->
     <div class="stats-grid" :style="{ gridTemplateColumns: selectedWarehouse ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)' }">
       <div class="stat-card">
@@ -135,6 +151,25 @@ const chartData = ref({
 const chartTitle = computed(() => {
   const wh = selectedWarehouse.value || "全仓汇总";
   return `仓库人力数据趋势 - ${wh}`;
+});
+
+function fmtCell(_row: any, _col: any, val: number): string {
+  return fmtNum(val);
+}
+
+const tableData = computed(() => {
+  const d = chartData.value;
+  const makeRow = (metric: string, vals: number[]) => {
+    const row: Record<string, number | string> = { metric };
+    vals.forEach((v, i) => { row[`d${i}`] = v; });
+    row.total = vals.reduce((a, b) => a + b, 0);
+    return row;
+  };
+  return [
+    makeRow('實際出勤人數', d.attendance_sums),
+    makeRow('實際需求人力', d.required_so_sums),
+    makeRow('歷史需求人數均值', d.avg_sums),
+  ];
 });
 
 const warehouseDisplay = computed(() => {
@@ -356,6 +391,42 @@ onMounted(async () => {
   color: #1D1D1F;
   font-family: 'Cascadia Code', ui-monospace, monospace;
   letter-spacing: -0.02em;
+}
+
+.detail-table {
+  margin-top: 16px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #D2D2D7;
+}
+
+:deep(.detail-table .el-table) {
+  border: none;
+  font-size: 14px;
+}
+
+:deep(.detail-table .el-table__header th) {
+  background: #1D1D1F !important;
+  color: #fff;
+  font-weight: 600;
+  border-bottom: none;
+}
+
+:deep(.detail-table .el-table__body td) {
+  border-bottom: 1px solid #D2D2D7;
+}
+
+:deep(.detail-table .el-table__body td:first-child) {
+  font-weight: 600;
+  color: #1D1D1F;
+}
+
+:deep(.detail-table .el-table__body td:last-child) {
+  font-weight: 700;
+  color: #2563EB;
+  background: #EFF6FF;
 }
 
 </style>

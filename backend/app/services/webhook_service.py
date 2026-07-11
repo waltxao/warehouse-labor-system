@@ -5,6 +5,7 @@ import io as _io
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as font_manager
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,7 +13,6 @@ from app.models import WebhookConfig, Warehouse, DailyRecord, ThreeMonthAverage
 from app.core.exceptions import AppException
 
 
-WEEKDAY_NAMES = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 TRAD_WEEKDAY_NAMES = ['週日', '週一', '週二', '週三', '週四', '週五', '週六']
 
 
@@ -30,49 +30,90 @@ def _format_date_label(date_str: str) -> str:
         return str(date_str)
 
 
+def _parse_date_range_to_short(date_range: str) -> str:
+    """将 2026-07-06~2026-07-11 转为 07/06-07/11"""
+    try:
+        parts = date_range.split('~')
+        if len(parts) != 2:
+            return date_range
+        s = parts[0].strip().split('-')
+        e = parts[1].strip().split('-')
+        return f"{s[1]}/{s[2]}-{e[1]}/{e[2]}"
+    except Exception:
+        return date_range
+
+
 def generate_chart_png(days, attendance, required, avg, warehouse_code, date_range, total_attendance, total_required, total_avg):
-    """生成三段式图表：说明区+折线图+KPI卡片"""
-    # 设置中文字体，避免中文显示为方框
+    """生成三段式图表：说明区+折线图+数据表格"""
     plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei', 'Microsoft YaHei', 'SimHei', 'SimSun', 'KaiTi', 'FangSong', 'STSong'] + ['sans-serif']
     plt.rcParams['axes.unicode_minus'] = False
 
-    fig = plt.figure(figsize=(12, 10), dpi=150)
+    short_range = _parse_date_range_to_short(date_range)
+    fig_title = f"{short_range} {warehouse_code}倉實際出勤人數與實際需求人力情況"
+
+    fig = plt.figure(figsize=(12, 11.5), dpi=150)
     fig.patch.set_facecolor('#FFFFFF')
 
-    # 使用 GridSpec 三行布局
-    from matplotlib.gridspec import GridSpec
-    gs = GridSpec(3, 1, height_ratios=[1.2, 3, 0.8], hspace=0.15)
+    # 統一邊距
+    fig.subplots_adjust(left=0.07, right=0.96, top=0.93, bottom=0.04, hspace=0.35)
 
-    # === 第一段：说明区 ===
+    from matplotlib.gridspec import GridSpec
+    gs = GridSpec(3, 1, height_ratios=[0.7, 2.5, 1.3])
+
+    # === 標題：左對齊加粗，宋體 ===
+    fig.text(0.07, 0.97, fig_title, fontsize=15, color='#1D1D1F',
+             fontweight='bold', ha='left', va='top',
+             fontproperties=font_manager.FontProperties(family='SimSun', weight='bold'))
+
+    # === 第一段：說明區（圓點+統一灰色，緊湊排列） ===
     ax_desc = fig.add_subplot(gs[0])
     ax_desc.axis('off')
-    desc_text = (
-        "實際需求人力：按各工序效能係數預測的人力需求，其中：跟車、留倉計算：1人，上門開客、Partime計算：0.5人；\n"
-        "實際出勤人數：當日實際出勤人數，（包含跟車、留倉、上門開客等人員）；\n"
-        "歷史需求人數均值：取近3個月實際出勤人數計算的平均值，用作標準線"
-    )
-    ax_desc.text(0.05, 0.5, desc_text, fontsize=10, color='#6E6E73', va='center',
-                fontfamily='sans-serif', linespacing=1.8)
+    desc_lines = [
+        ('#2563EB', '實際需求人力：按各工序效能係數預測的人力需求，其中：跟車、留倉計算：1人，上門開客、Partime計算：0.5人；'),
+        ('#059669', '實際出勤人數：當日實際出勤人數，（包含跟車、留倉、上門開客等人員）；'),
+        ('#6B7280', '歷史需求人數均值：取近3個月實際出勤人數計算的平均值，用作標準線'),
+    ]
+    y_starts = [0.80, 0.50, 0.20]
+    for color_dot, text_line, ypos in zip([d[0] for d in desc_lines], [d[1] for d in desc_lines], y_starts):
+        # 畫圓點
+        ax_desc.plot(0.015, ypos, 'o', markersize=6, color=color_dot,
+                     transform=ax_desc.transAxes, clip_on=False)
+        # 整行文字統一灰色
+        ax_desc.text(0.04, ypos, text_line, fontsize=10, color='#6E6E73',
+                     va='center', fontfamily='sans-serif',
+                     transform=ax_desc.transAxes)
 
-    # === 第二段：折线图 ===
+    # === 第二段：折線圖 ===
     ax = fig.add_subplot(gs[1])
     x_labels = [_format_date_label(d) for d in days]
     x = range(len(days))
 
-    # 出勤人数 - 蓝色实线
-    ax.plot(x, attendance, color='#2563EB', linewidth=2.5, marker='o', markersize=7, label='實際出勤人數', zorder=3)
-    ax.fill_between(x, attendance, alpha=0.08, color='#2563EB')
+    # 平滑曲線插值
+    import numpy as np
+    from scipy.interpolate import make_interp_spline
 
-    # 需求人力 - 绿色实线
-    ax.plot(x, required, color='#059669', linewidth=2, marker='s', markersize=6, label='實際需求人力', zorder=2)
+    def _smooth(x_vals, y_vals):
+        x_arr = np.array(x_vals)
+        y_arr = np.array([v if v is not None else 0 for v in y_vals], dtype=float)
+        x_smooth = np.linspace(x_arr.min(), x_arr.max(), 100)
+        spline = make_interp_spline(x_arr, y_arr, k=3)
+        return x_smooth, spline(x_smooth)
 
-    # 历史均值 - 灰色虚线
+    xs_att, ys_att = _smooth(x, attendance)
+    xs_req, ys_req = _smooth(x, required)
+
+    ax.plot(xs_att, ys_att, color='#2563EB', linewidth=2.5, label='實際出勤人數', zorder=3)
+    ax.plot(x, attendance, 'o', color='#2563EB', markersize=7, zorder=4)
+    ax.fill_between(xs_att, ys_att, alpha=0.08, color='#2563EB')
+
+    ax.plot(xs_req, ys_req, color='#059669', linewidth=2, label='實際需求人力', zorder=2)
+    ax.plot(x, required, 's', color='#059669', markersize=6, zorder=2)
+
     if avg and any(v > 0 for v in avg):
-        ax.plot(x, avg, color='#6B7280', linewidth=1.5, linestyle='--', label='歷史需求人數均值', zorder=1)
+        xs_avg, ys_avg = _smooth(x, avg)
+        ax.plot(xs_avg, ys_avg, color='#6B7280', linewidth=1.5, linestyle='--', label='歷史需求人數均值', zorder=1)
 
     ax.set_ylabel('人數', fontsize=11, color='#1D1D1F')
-    ax.set_title(f'{warehouse_code}倉實際出勤人數與實際需求人力情況 ({date_range})',
-                fontsize=14, color='#1D1D1F', fontweight='bold', pad=15)
     ax.set_xticks(list(x))
     ax.set_xticklabels(x_labels, fontsize=9, color='#6E6E73')
     ax.legend(loc='upper right', fontsize=9, framealpha=0.9)
@@ -82,7 +123,6 @@ def generate_chart_png(days, attendance, required, avg, warehouse_code, date_ran
     ax.spines['left'].set_color('#D2D2D7')
     ax.spines['bottom'].set_color('#D2D2D7')
 
-    # 数据标签
     for i, (a, r) in enumerate(zip(attendance, required)):
         if a is not None and a > 0:
             ax.annotate(str(int(a)), (i, a), textcoords="offset points", xytext=(0, 8),
@@ -91,35 +131,63 @@ def generate_chart_png(days, attendance, required, avg, warehouse_code, date_ran
             ax.annotate(f'{r:.1f}', (i, r), textcoords="offset points", xytext=(0, -12),
                        ha='center', fontsize=8, color='#059669')
 
-    # === 第三段：KPI卡片 ===
-    ax_kpi = fig.add_subplot(gs[2])
-    ax_kpi.axis('off')
+    # === 第三段：數據表格 ===
+    ax_table = fig.add_subplot(gs[2])
+    ax_table.axis('off')
 
-    card_width = 1/3
-    cards = [
-        ('週總出勤人次', str(int(total_attendance)), '#2563EB'),
-        ('週總需求人力', f'{total_required:.1f}', '#059669'),
-        ('週歷史需求人數均值', f'{total_avg:.1f}', '#6B7280'),
+    def _fmt_num(v):
+        if v is None or v == 0:
+            return '0'
+        if v == int(v):
+            return str(int(v))
+        return f'{v:.1f}'
+
+    col_labels = ['指標'] + [_format_date_label(d) for d in days] + ['匯總']
+    cell_text = [
+        ['實際出勤人數'] + [_fmt_num(a) for a in attendance] + [_fmt_num(total_attendance)],
+        ['實際需求人力'] + [_fmt_num(r) for r in required] + [_fmt_num(total_required)],
+        ['歷史需求人數均值'] + [_fmt_num(a) for a in avg] + [_fmt_num(total_avg)],
     ]
-    for i, (label, value, color) in enumerate(cards):
-        x_start = i * card_width + 0.02
-        # 卡片背景
-        rect = plt.Rectangle((x_start, 0.1), card_width - 0.04, 0.8,
-                           transform=ax_kpi.transAxes, facecolor='#F5F5F7',
-                           edgecolor='#D2D2D7', linewidth=1, zorder=1)
-        ax_kpi.add_patch(rect)
-        # 数值
-        ax_kpi.text(x_start + (card_width-0.04)/2, 0.55, value,
-                  transform=ax_kpi.transAxes, fontsize=20, fontweight='bold',
-                  color=color, ha='center', va='center')
-        # 标签
-        ax_kpi.text(x_start + (card_width-0.04)/2, 0.25, label,
-                  transform=ax_kpi.transAxes, fontsize=9, color='#6E6E73',
-                  ha='center', va='center')
 
-    plt.tight_layout()
+    table = ax_table.table(
+        cellText=cell_text,
+        colLabels=col_labels,
+        cellLoc='center',
+        loc='center',
+        bbox=[0.0, 0.0, 1.0, 1.0],
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1, 1.4)
+
+    for j in range(len(col_labels)):
+        cell = table[0, j]
+        cell.set_facecolor('#1D1D1F')
+        cell.set_text_props(color='white', fontweight='bold', fontsize=9)
+
+    for i in range(1, 4):
+        for j in range(len(col_labels)):
+            cell = table[i, j]
+            if i % 2 == 1:
+                cell.set_facecolor('#F5F5F7')
+            else:
+                cell.set_facecolor('#FFFFFF')
+            cell.set_text_props(fontsize=9)
+
+    for i in range(1, 4):
+        table[i, 0].set_text_props(fontweight='bold')
+
+    for i in range(1, 4):
+        table[i, len(col_labels) - 1].set_text_props(fontweight='bold', color='#2563EB')
+
+    # === 淺灰分隔線 ===
+    for gap_y in [0.780, 0.460]:
+        fig.lines.append(plt.Line2D([0.07, 0.96], [gap_y, gap_y],
+                                    transform=fig.transFigure, color='#E5E5EA',
+                                    linewidth=0.8))
+
     buf = _io.BytesIO()
-    plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', facecolor='#FFFFFF')
+    plt.savefig(buf, format='png', dpi=150, facecolor='#FFFFFF')
     plt.close(fig)
     buf.seek(0)
     return base64.b64encode(buf.read()).decode('utf-8')
@@ -155,6 +223,7 @@ async def push_chart_to_wechat(
 
     total_attendance = sum(r.actual_attendance or 0 for r in records)
     total_required = sum(r.required_headcount_so or 0 for r in records)
+    total_avg = 0
     if records:
         start_date = str(records[0].date)
         end_date = str(records[-1].date)
@@ -166,16 +235,17 @@ async def push_chart_to_wechat(
         nicknames = [n.strip() for n in config.notify_users.split(",") if n.strip()]
     mention_text = " ".join(f"@{n}" for n in nicknames)
 
-    # 使用配置的消息模板，支持变量替换
-    default_template = "{warehouse}倉實際出勤人數與實際需求人力情況图表\n\n以上 {date_range} {warehouse}倉實際出勤人數與實際需求人力情況，请{notify_users} 留意"
-    template = config.message_template or default_template
-    md_content = template.format(
-        warehouse=warehouse_code,
-        date_range=f"{start_date}-{end_date}",
-        notify_users=mention_text,
-        total_attendance=int(total_attendance),
-        total_required=round(total_required, 1),
-    )
+    # 仅当配置了消息模板时才推送文字消息
+    md_content = None
+    if config.message_template:
+        md_content = config.message_template.format(
+            warehouse=warehouse_code,
+            date_range=f"{start_date}-{end_date}",
+            notify_users=mention_text,
+            total_attendance=int(total_attendance),
+            total_required=round(total_required, 1),
+            total_avg=round(total_avg, 1) if total_avg else 0,
+        )
 
     if "base64," in chart_base64:
         chart_base64 = chart_base64.split("base64,")[1]
@@ -186,10 +256,6 @@ async def push_chart_to_wechat(
         "msgtype": "image",
         "image": {"base64": chart_base64, "md5": md5_hash}
     }
-    text_payload = {
-        "msgtype": "markdown",
-        "markdown": {"content": md_content}
-    }
 
     results = []
     async with httpx.AsyncClient(timeout=30) as http_client:
@@ -199,11 +265,16 @@ async def push_chart_to_wechat(
         if img_resp.status_code != 200 or img_data.get("errcode") != 0:
             raise AppException(500, f"图片消息发送失败: {img_data}")
 
-        text_resp = await http_client.post(config.webhook_url, json=text_payload)
-        text_data = text_resp.json()
-        results.append({"type": "text", "status": text_resp.status_code, "data": text_data})
-        if text_resp.status_code != 200 or text_data.get("errcode") != 0:
-            raise AppException(500, f"文字消息发送失败: {text_data}")
+        if md_content:
+            text_payload = {
+                "msgtype": "markdown",
+                "markdown": {"content": md_content}
+            }
+            text_resp = await http_client.post(config.webhook_url, json=text_payload)
+            text_data = text_resp.json()
+            results.append({"type": "text", "status": text_resp.status_code, "data": text_data})
+            if text_resp.status_code != 200 or text_data.get("errcode") != 0:
+                raise AppException(500, f"文字消息发送失败: {text_data}")
 
     return {"success": True, "message": "推送成功", "details": results}
 
@@ -266,14 +337,14 @@ async def push_all_to_wechat(db: AsyncSession, iso_week: str, warehouse_codes: l
                     avg_map[a.day_of_week] = a.average_value
             avg = [avg_map.get(dow, 0) for dow in dow_list]
 
-            # 计算周总值用于 KPI 卡片
+            # 计算周总值用于数据表格汇总列
             total_attendance = sum(attendance)
             total_required = sum(required)
             total_avg = sum(avg)
 
             date_range = f"{days[0]}~{days[-1]}" if days else iso_week
 
-            # 生成三段式图表（传入周总数值用于 KPI 卡片）
+            # 生成三段式图表（传入周总数值用于数据表格汇总列）
             chart_base64 = generate_chart_png(
                 days, attendance, required, avg, wh_code, date_range,
                 total_attendance, total_required, total_avg

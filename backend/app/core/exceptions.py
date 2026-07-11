@@ -1,9 +1,10 @@
-from fastapi import Request
+﻿from fastapi import Request
 from fastapi.responses import JSONResponse
 
 
 class AppException(Exception):
     def __init__(self, code: int, message: str, data: dict = None):
+        super().__init__(message)
         self.code = code
         self.message = message
         self.data = data

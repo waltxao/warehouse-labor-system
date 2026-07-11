@@ -36,8 +36,6 @@ const props = defineProps<{
 const chartRef = ref<HTMLElement>();
 let chart: echarts.ECharts | null = null;
 
-const titleText = props.title || "仓库人力数据趋势分析";
-
 function renderChart() {
   if (!chartRef.value) return;
   if (!chart) {

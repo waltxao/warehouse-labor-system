@@ -24,11 +24,25 @@
             <span>{{ row.notify_users || '—' }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="文字模板" width="100">
+          <template #default="{ row }">
+            <span v-if="row.message_template" :class="['status-tag', 'active']">已设置</span>
+            <span v-else style="color: #6E6E73; font-size: 13px;">未设置</span>
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <span :class="['status-tag', row.is_active ? 'active' : 'inactive']">
               {{ row.is_active ? '启用' : '禁用' }}
             </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="定时推送" width="140">
+          <template #default="{ row }">
+            <span v-if="row.schedule_enabled" :class="['status-tag', 'active']">
+              {{ ['周一','周二','周三','周四','周五','周六','周日'][row.schedule_day] }} {{ row.schedule_time }}
+            </span>
+            <span v-else style="color: #6E6E73; font-size: 13px;">—</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="160" fixed="right">
@@ -51,12 +65,13 @@
             :disabled="isEdit"
           >
             <el-option
-              v-for="wh in warehouses"
+              v-for="wh in availableWarehouses"
               :key="wh.id"
               :label="wh.code + (wh.name ? ' - ' + wh.name : '')"
               :value="wh.id"
             />
           </el-select>
+          <p v-if="!isEdit && availableWarehouses.length === 0" style="color: #6E6E73; font-size: 13px;">所有仓库均已配置 Webhook</p>
         </el-form-item>
         <el-form-item label="Webhook URL">
           <el-input
@@ -79,7 +94,7 @@
             v-model="form.message_template"
             type="textarea"
             :rows="4"
-            placeholder="留空使用默认模板"
+            placeholder="不设置则仅推送图片，不推送文字消息"
           />
           <div class="var-tags">
             <span class="var-tag" @click="insertVar('{warehouse}')">{warehouse} 仓库代码</span>
@@ -89,6 +104,34 @@
             <span class="var-tag" @click="insertVar('{total_required}')">{total_required} 需求人力</span>
           </div>
         </el-form-item>
+
+        <!-- 定时推送配置 -->
+        <el-divider content-position="left">定时推送</el-divider>
+        <el-form-item label="定时推送">
+          <el-switch v-model="form.schedule_enabled" />
+        </el-form-item>
+        <template v-if="form.schedule_enabled">
+          <el-form-item label="推送日期">
+            <el-select v-model="form.schedule_day" style="width: 100%">
+              <el-option label="周一" :value="0" />
+              <el-option label="周二" :value="1" />
+              <el-option label="周三" :value="2" />
+              <el-option label="周四" :value="3" />
+              <el-option label="周五" :value="4" />
+              <el-option label="周六" :value="5" />
+              <el-option label="周日" :value="6" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="推送时间">
+            <el-time-picker
+              v-model="form.schedule_time"
+              format="HH:mm"
+              value-format="HH:mm"
+              placeholder="选择时间"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </template>
 
       </el-form>
       <template #footer>
@@ -108,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getWebhooks, createWebhook, updateWebhook, deleteWebhook } from '../api/webhook'
 import PageIntro from '../components/PageIntro.vue'
@@ -137,6 +180,13 @@ interface WarehouseInfo {
 const configs = ref<WebhookConfig[]>([])
 const warehouses = ref<WarehouseInfo[]>([])
 const loading = ref(false)
+
+// 新建模式下排除已配置 Webhook 的仓库
+const availableWarehouses = computed(() => {
+  if (isEdit.value) return warehouses.value
+  const configuredIds = new Set(configs.value.map(c => c.warehouse_id))
+  return warehouses.value.filter(w => !configuredIds.has(w.id))
+})
 const saving = ref(false)
 const templateRef = ref<any>(null)
 const dialogVisible = ref(false)
@@ -243,7 +293,7 @@ async function handleSave() {
         schedule_enabled: form.schedule_enabled,
         schedule_day: form.schedule_day,
         schedule_time: form.schedule_time,
-      } as any)
+      })
       ElMessage.success('更新成功')
     } else {
       await createWebhook({
@@ -254,7 +304,7 @@ async function handleSave() {
         schedule_enabled: form.schedule_enabled,
         schedule_day: form.schedule_day,
         schedule_time: form.schedule_time,
-      } as any)
+      })
       ElMessage.success('创建成功')
     }
     dialogVisible.value = false

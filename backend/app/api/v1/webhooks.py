@@ -112,46 +112,6 @@ async def update_webhook(
     return ApiResponse[dict](data={"id": config.id})
 
 
-@router.put("/{webhook_id}/schedule")
-async def update_schedule(
-    webhook_id: int,
-    req: dict,
-    user: User = Depends(require_role("admin")),
-    db: AsyncSession = Depends(get_db),
-):
-    """更新定时推送配置（schedule_enabled / schedule_day / schedule_time）"""
-    result = await db.execute(select(WebhookConfig).where(WebhookConfig.id == webhook_id))
-    config = result.scalar_one_or_none()
-    if not config:
-        raise AppException(404, "Webhook 配置不存在")
-
-    if "schedule_enabled" in req and req["schedule_enabled"] is not None:
-        config.schedule_enabled = bool(req["schedule_enabled"])
-    if "schedule_day" in req and req["schedule_day"] is not None:
-        day = int(req["schedule_day"])
-        if day < 0 or day > 6:
-            raise AppException(400, "schedule_day 取值范围 0-6（0=周一...6=周日）")
-        config.schedule_day = day
-    if "schedule_time" in req and req["schedule_time"] is not None:
-        time_str = str(req["schedule_time"]).strip()
-        # 简单校验 HH:MM
-        try:
-            h, m = time_str.split(":")
-            if not (0 <= int(h) <= 23 and 0 <= int(m) <= 59):
-                raise ValueError
-        except Exception:
-            raise AppException(400, "schedule_time 格式应为 HH:MM")
-        config.schedule_time = time_str
-
-    await db.commit()
-    return ApiResponse[dict](data={
-        "id": config.id,
-        "schedule_enabled": config.schedule_enabled,
-        "schedule_day": config.schedule_day,
-        "schedule_time": config.schedule_time,
-    })
-
-
 @router.delete("/{webhook_id}")
 async def delete_webhook(
     webhook_id: int,
@@ -186,13 +146,11 @@ async def push_chart(
 
 @router.post("/push-all")
 async def push_all(
-    req: dict,
+    req: PushAllRequest,
     user: User = Depends(require_role("admin")),
     db: AsyncSession = Depends(get_db),
 ):
-    iso_week = req.get("iso_week", "")
-    warehouse_codes = req.get("warehouse_codes", [])
-    if not iso_week:
+    if not req.iso_week:
         raise AppException(400, "请提供周次")
-    result = await push_all_to_wechat(db=db, iso_week=iso_week, warehouse_codes=warehouse_codes)
+    result = await push_all_to_wechat(db=db, iso_week=req.iso_week, warehouse_codes=req.warehouse_codes)
     return ApiResponse[dict](data=result)

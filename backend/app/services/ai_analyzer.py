@@ -135,7 +135,7 @@ async def _build_prompt(db: AsyncSession, analysis_type: str, warehouse_codes: l
 
 async def _call_ai_api(prompt: str) -> tuple[str, int, int]:
     if not settings.AI_API_KEY:
-        raise AppException("AI API Key 未配置，请在 backend/.env 文件中设置 AI_API_KEY")
+        raise AppException(500, "AI API Key 未配置，请在 backend/.env 文件中设置 AI_API_KEY")
 
     async with httpx.AsyncClient(timeout=60) as client:
         try:
@@ -157,7 +157,7 @@ async def _call_ai_api(prompt: str) -> tuple[str, int, int]:
             return content, usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0)
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
-                raise AppException("AI API Key 无效或已过期，请检查 backend/.env 中的 AI_API_KEY 配置")
-            raise AppException(f"AI API 请求失败: HTTP {e.response.status_code} - {e.response.text[:200]}")
+                raise AppException(401, "AI API Key 无效或已过期，请检查 backend/.env 中的 AI_API_KEY 配置")
+            raise AppException(502, f"AI API 请求失败: HTTP {e.response.status_code} - {e.response.text[:200]}")
         except httpx.RequestError as e:
-            raise AppException(f"AI API 网络请求失败: {str(e)}")
+            raise AppException(503, f"AI API 网络请求失败: {str(e)}")

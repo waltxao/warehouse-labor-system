@@ -68,7 +68,7 @@
             <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/>
             <path d="m21.854 2.147-10.94 10.939"/>
           </svg>
-          <span>{{ t('notifications') || '推送配置' }}</span>
+          <span>{{ t('notifications') }}</span>
         </div>
 
         <div
@@ -115,7 +115,7 @@
         </div>
       </nav>
       <div class="sidebar-footer">
-        <span class="version-text">v2.2.0 · Walt</span>
+        <span class="version-text">v2.4.0 · Walt</span>
       </div>
     </el-aside>
     <el-container>
@@ -161,32 +161,35 @@
         </el-select>
       </el-form-item>
       <el-form-item label="仓库">
-        <el-checkbox-group v-model="pushForm.warehouse_codes">
-          <el-checkbox v-for="wh in pushWarehouses" :key="wh.code" :label="wh.code" :value="wh.code" style="display: block; margin-bottom: 8px;">
-            {{ wh.code }}{{ wh.name && wh.name !== wh.code ? ' (' + wh.name + ')' : '' }}
-          </el-checkbox>
-        </el-checkbox-group>
+        <el-select
+          v-model="pushForm.warehouse_codes"
+          multiple
+          collapse-tags
+          collapse-tags-tooltip
+          filterable
+          placeholder="选择仓库"
+          style="width: 100%"
+          @visible-change="onPushSelectVisibleChange"
+        >
+          <el-option
+            v-if="pushWarehouses.length > 0"
+            label="全选"
+            :value="'__ALL__'"
+            @click.prevent="toggleSelectAll"
+          />
+          <el-option
+            v-for="wh in pushWarehouses"
+            :key="wh.code"
+            :label="wh.code + (wh.name && wh.name !== wh.code ? ' (' + wh.name + ')' : '')"
+            :value="wh.code"
+          />
+        </el-select>
+        <p v-if="pushWarehouses.length > 0" style="color: #6E6E73; font-size: 12px; margin-top: 4px;">
+          已选 {{ pushForm.warehouse_codes.length }}/{{ pushWarehouses.length }} 个仓库
+        </p>
         <p v-if="pushWarehouses.length === 0" style="color: #6E6E73; font-size: 13px;">暂无已配置且启用的推送仓库，请先在推送配置中添加</p>
       </el-form-item>
-      <el-form-item label="定时推送">
-        <el-switch v-model="pushForm.schedule_enabled" />
-      </el-form-item>
-      <template v-if="pushForm.schedule_enabled">
-        <el-form-item label="推送日期">
-          <el-select v-model="pushForm.schedule_day" style="width: 100%">
-            <el-option label="周一" :value="0" />
-            <el-option label="周二" :value="1" />
-            <el-option label="周三" :value="2" />
-            <el-option label="周四" :value="3" />
-            <el-option label="周五" :value="4" />
-            <el-option label="周六" :value="5" />
-            <el-option label="周日" :value="6" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="推送时间">
-          <el-time-picker v-model="pushForm.schedule_time" format="HH:mm" value-format="HH:mm" placeholder="选择时间" style="width: 100%" />
-        </el-form-item>
-      </template>
+
     </el-form>
     <template #footer>
       <el-button @click="pushDialogVisible = false">取消</el-button>
@@ -261,9 +264,6 @@ const pushWarehouses = ref<{code: string, name: string}[]>([])
 const pushForm = reactive({
   iso_week: '',
   warehouse_codes: [] as string[],
-  schedule_enabled: false,
-  schedule_day: 0,
-  schedule_time: '09:00',
 })
 
 async function openPushDialog() {
@@ -293,8 +293,26 @@ async function openPushDialog() {
   }
 
   pushForm.warehouse_codes = []
-  pushForm.schedule_enabled = false
   pushDialogVisible.value = true
+}
+
+function toggleSelectAll() {
+  if (pushForm.warehouse_codes.length === pushWarehouses.value.length) {
+    // 已全选 → 取消全选
+    pushForm.warehouse_codes = []
+  } else {
+    // 未全选 → 全选
+    pushForm.warehouse_codes = pushWarehouses.value.map(w => w.code)
+  }
+}
+
+function onPushSelectVisibleChange(visible: boolean) {
+  // 下拉关闭时过滤掉 __ALL__ 伪值（防止用户意外选中）
+  if (!visible) {
+    pushForm.warehouse_codes = pushForm.warehouse_codes.filter(
+      (code: string) => code !== '__ALL__'
+    )
+  }
 }
 
 async function executePush() {

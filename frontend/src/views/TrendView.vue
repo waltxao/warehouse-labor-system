@@ -17,10 +17,10 @@
       <TrendChart
         v-if="chartData"
         ref="trendChartRef"
-        :dates="chartData.dates"
+        :days="chartData.dates"
         :attendance="chartData.attendance"
         :required-so="chartData.required_so"
-        :three-month-avg="chartData.three_month_avg"
+        :avg-sums="chartData.three_month_avg"
       />
 
       <el-empty v-else description="请选择仓库与周次后查询趋势数据" />

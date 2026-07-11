@@ -55,8 +55,7 @@ async def _get_trend_data(warehouse_code: str, iso_week: str, db: AsyncSession) 
 
     avgs = await db.execute(
         select(ThreeMonthAverage)
-        .where(ThreeMonthAverage.warehouse_id == warehouse.id, ThreeMonthAverage.iso_week.in_([iso_week, "baseline"]))
-        .order_by(ThreeMonthAverage.iso_week.desc())
+        .where(ThreeMonthAverage.warehouse_id == warehouse.id, ThreeMonthAverage.iso_week == iso_week)
     )
     avg_map = {}
     for a in avgs.scalars().all():
@@ -127,16 +126,16 @@ async def get_summary(
             ThreeMonthAverage.average_value.label("avg_sum"),
         ).where(
             ThreeMonthAverage.warehouse_id == warehouse_id,
-            ThreeMonthAverage.iso_week.in_([iso_week, "baseline"]),
+            ThreeMonthAverage.iso_week == iso_week,
         )
     else:
         avg_query = select(
             ThreeMonthAverage.day_of_week,
             func.sum(ThreeMonthAverage.average_value).label("avg_sum"),
         ).where(
-            ThreeMonthAverage.iso_week.in_([iso_week, "baseline"])
+            ThreeMonthAverage.iso_week == iso_week
         ).group_by(
-            ThreeMonthAverage.day_of_week, ThreeMonthAverage.iso_week
+            ThreeMonthAverage.day_of_week
         )
 
     avg_query = avg_query.order_by(ThreeMonthAverage.day_of_week)
