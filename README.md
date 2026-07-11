@@ -80,26 +80,96 @@
 ## 目录结构
 
 ```
-├── start.bat              # 一键启动脚本
-├── CHANGELOG.md           # 更新日志
-├── backend/               # 后端服务
-│   ├── app/
-│   │   ├── models/        # 数据模型
-│   │   ├── api/v1/        # API 路由
-│   │   ├── services/      # 业务逻辑（webhook_service 图表生成与推送）
-│   │   ├── core/          # 异常处理、依赖注入
-│   │   └── main.py        # FastAPI 入口（含 APScheduler 定时任务）
-│   ├── data/              # SQLite 数据库 + 上传文件
-│   ├── venv/              # Python 虚拟环境
-│   └── requirements.txt
-├── frontend/              # Vue 3 前端源码
-│   ├── src/
-│   │   ├── components/    # 组件（AppLayout, TrendChart, PageIntro 等）
-│   │   ├── views/         # 页面视图
-│   │   ├── api/           # API 客户端
-│   │   └── assets/        # 样式资源
-│   └── package.json
-└── docs/                  # 设计文档
+warehouse-labor-system/
+├── start.bat                  # 一键启动脚本
+├── README.md                  # 项目说明
+├── CHANGELOG.md               # 更新日志
+├── API_CONFIG.md              # API 配置指南
+├── .gitignore
+│
+├── backend/                   # 后端服务
+│   ├── .env                   # 环境变量（API Key、密钥）
+│   ├── .env.example           # 环境变量示例
+│   ├── requirements.txt       # Python 依赖
+│   ├── alembic.ini            # 数据库迁移配置
+│   ├── init_data.py           # 初始化数据脚本
+│   ├── warehouse_labor.db     # SQLite 数据库
+│   ├── alembic/               # 数据库迁移脚本
+│   ├── data/                  # 上传文件存储
+│   └── app/
+│       ├── main.py            # FastAPI 入口（含 APScheduler 定时推送）
+│       ├── config.py          # 配置加载
+│       ├── database.py        # 数据库连接
+│       ├── api/v1/            # API 路由
+│       │   ├── auth.py        # 认证
+│       │   ├── upload.py      # Excel 上传
+│       │   ├── warehouses.py  # 仓库管理
+│       │   ├── trends.py      # 趋势数据
+│       │   ├── comparison.py  # 多仓对比
+│       │   ├── alerts.py      # 告警
+│       │   ├── ai.py          # AI 分析
+│       │   ├── export.py      # 数据导出
+│       │   ├── webhooks.py    # 推送配置
+│       │   └── users.py       # 用户管理
+│       ├── services/          # 业务逻辑
+│       │   ├── excel_parser.py    # Excel 解析
+│       │   ├── average_calculator.py  # 历史均值计算
+│       │   ├── alert_engine.py      # 告警引擎
+│       │   ├── ai_analyzer.py       # AI 分析
+│       │   ├── export_service.py    # 数据导出
+│       │   └── webhook_service.py   # 图表生成 + 企业微信推送
+│       ├── models/            # SQLAlchemy 数据模型
+│       │   ├── warehouse.py   # 仓库
+│       │   ├── report.py      # 每日数据
+│       │   ├── average.py     # 三月均值
+│       │   ├── alert.py       # 告警日志
+│       │   ├── webhook.py     # Webhook 配置
+│       │   └── user.py        # 用户
+│       ├── schemas/           # Pydantic 请求/响应模型
+│       └── core/              # 安全与异常
+│           ├── security.py    # JWT 认证
+│           ├── deps.py        # 依赖注入
+│           └── exceptions.py  # 自定义异常
+│
+├── frontend/                  # Vue 3 前端
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   └── src/
+│       ├── App.vue            # 根组件
+│       ├── main.ts            # 入口
+│       ├── components/        # 通用组件
+│       │   ├── AppLayout.vue      # 布局（侧边栏 + 推送对话框）
+│       │   ├── TrendChart.vue     # 趋势图表
+│       │   ├── ComparisonChart.vue # 对比图表
+│       │   └── PageIntro.vue      # 页面说明
+│       ├── views/             # 页面视图
+│       │   ├── DashboardView.vue          # 总览
+│       │   ├── TrendView.vue               # 趋势分析
+│       │   ├── ComparisonView.vue          # 多仓对比
+│       │   ├── AlertsView.vue             # 告警
+│       │   ├── AIAnalysisView.vue          # AI 分析
+│       │   ├── UploadView.vue              # 数据上传
+│       │   ├── NotificationConfigView.vue  # 推送配置
+│       │   ├── UsersView.vue               # 用户管理
+│       │   ├── SettingsView.vue            # 系统设置
+│       │   └── LoginView.vue               # 登录
+│       ├── api/               # API 客户端
+│       │   ├── client.ts      # Axios 实例
+│       │   ├── trends.ts
+│       │   ├── comparison.ts
+│       │   ├── alerts.ts
+│       │   ├── ai.ts
+│       │   ├── upload.ts
+│       │   ├── webhook.ts
+│       │   └── users.ts
+│       ├── stores/            # Pinia 状态管理
+│       ├── router/            # Vue Router 路由
+│       ├── i18n/              # 国际化（简中/繁中）
+│       ├── utils/             # 工具函数
+│       └── assets/            # 样式资源
+│
+└── docs/                      # 设计文档
 ```
 
 ## 更新日志
