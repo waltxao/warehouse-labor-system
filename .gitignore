@@ -22,3 +22,6 @@ backend/app/static/
 # 临时测试文件
 backend/test_upload.xlsx
 backend/inspect_excel.py
+
+# 演示文稿（本地生成，不提交）
+superpowers-deep-dive/
